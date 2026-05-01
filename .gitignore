@@ -1,0 +1,7 @@
+.idea/
+../.venv/
+.venv/**
+site/
+**/.venv/
+/python-cheatsheet/docs/applications/emails/token.pickle
+/python-cheatsheet/docs/applications/emails/credentials.json
