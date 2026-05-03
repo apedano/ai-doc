@@ -1,5 +1,6 @@
 py -m venv .venv
 .\.venv\Scripts\activate
+pip install -r requirements.txt
 $env:NO_MKDOCS_2_WARNING = 1
 Write-Host "Starting mkdocs serve"
 Write-Host "Don't forget to deploy GitHub"

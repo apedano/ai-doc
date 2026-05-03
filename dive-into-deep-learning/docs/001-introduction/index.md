@@ -31,7 +31,7 @@ Each sample is a measurement of the amplitude of the sound wave. What rule could
 If you are stuck, do not worry. We do not know how to write such a program from scratch either. 
 That is why we use machine learning.
 
-![img](img\wake-word.png)
+![img](img/wake-word.png)
 *Figure 1.1.1*
 
 
@@ -74,8 +74,7 @@ As shown in Fig. 1.1.2, the training process usually looks like the following:
 
 1. Start off with a randomly initialized model that cannot do anything useful.
 
-2. Grab some of your data (e.g., audio snippets and corresponding 
- labels).
+2. Grab some of your data (e.g., audio snippets and corresponding labels).
 
 3. Tweak the knobs to make the model perform better as assessed on those examples.
 
@@ -106,8 +105,9 @@ Before we explore other varieties, we would like to shed more light on some core
 ### Data
 
 Generally, we are concerned with a collection of examples. In order to work with data usefully, we typically need to come up with a suitable numerical representation. 
-Each example (or data point, data instance, sample) typically consists of a set of attributes called **features** (sometimes called **covariates** or **inputs**), based on which the model must make its predictions. 
-In **supervised learning problems**, our goal is to **predict the value of a special attribute, called the label (or _target_)**, that is not part of the model’s input.
+> Each example (or data point, data instance, sample) typically consists of a set of attributes called <span style="color:red">**features**</span> (sometimes called **covariates** or **inputs**), based on which the model must make its predictions. 
+
+> In **supervised learning problems**, our goal is to **predict the value of a special attribute, called the <span style="color:red">label (or _target_)>/span>**, that is not part of the model’s input.
 
 If we were working with image data, each example might consist of an individual photograph (the features) and a number indicating the category to which the photograph belongs (the label). 
 The 200x200 photograph would be represented numerically as three grids of numerical values RGB so that $200x200x3 = 120.000$ different values.
@@ -116,7 +116,7 @@ Alternatively, we might work with electronic health record data and tackle the t
 Here, our features might consist of a collection of readily available attributes and frequently recorded measurements, including age, vital signs, comorbidities, current medications, and recent procedures. 
 The label available for training would be a binary value indicating whether each patient in the historical data survived within the 30-day window.
 
-> In such cases, **when every example is characterized by the same number of numerical features, we say that the inputs are _fixed-length vectors_** and we call the (constant) length of the vectors the **dimensionality of the data**. As you might imagine, fixed-length inputs can be convenient, giving us one less complication to worry about. 
+> In such cases, **when every example is characterized by the same number of numerical features, we say that the inputs are <span style="color:red">_fixed-length vectors_**</span> and we call the (constant) length of the vectors the **dimensionality of the data**. As you might imagine, fixed-length inputs can be convenient, giving us one less complication to worry about. 
 
 However, not all data can easily be represented as fixed-length vectors. While we might expect microscope images to come from standard equipment, we cannot expect images mined from the Internet all to have the same resolution or shape. For images, we might consider cropping them to a standard size, but that strategy only gets us so far. 
 We risk losing information in the cropped-out portions. Moreover, text data resists fixed-length representations even more stubbornly. Consider the customer reviews left on e-commerce sites such as Amazon, IMDb, and TripAdvisor. 
@@ -133,7 +133,7 @@ Most machine learning involves transforming the data in some sense.
 We might want to build a system that ingests photos and predicts smiley-ness. 
 Alternatively, we might want to ingest a set of sensor readings and predict how normal vs. anomalous the readings are. 
 
-> By **model**, we denote the computational machinery for ingesting data of one type, and spitting out predictions of a possibly different type. 
+> By <span style="color:red">**model**</span>, we denote the computational machinery for ingesting data of one type, and spitting out predictions of a possibly different type. 
 
 In particular, we are interested in statistical models that can be estimated from data. 
 While simple models are perfectly capable of addressing appropriately simple problems, the problems that we focus on in this book stretch the limits of classical methods. 
@@ -145,12 +145,12 @@ On our way to discussing deep models, we will also discuss some more traditional
 Earlier, we introduced machine learning as learning from experience. By learning here, we mean improving at some task over time. 
 But who is to say what constitutes an improvement? You might imagine that we could propose updating our model, and some people might disagree on whether our proposal constituted an improvement or not.
 
-> In order to develop a formal mathematical system of learning machines, we need to have **formal measures of how good (or bad) our models are**. 
+> In order to develop a formal mathematical system of learning machines, we need to have <span style="color:red">**formal measures of how good (or bad) our models are**</span>. 
 > In machine learning, and optimization more generally, we call these **objective functions**. 
 
 By convention, we usually define objective functions so that **lower is better**. This is merely a convention. You can take any function for which higher is better, and turn it into a new function that is qualitatively identical but for which lower is better by flipping the sign. 
 
-> Because we choose lower to be better, these functions are sometimes called **loss functions**.
+> Because we choose lower to be better, these functions are sometimes called <span style="color:red">**loss functions**</span>.
 
 When trying to predict numerical values, the most common loss function is squared error, i.e., the square of the difference between the prediction and the ground truth target. 
 For classification, the most common objective is to minimize error rate, i.e., the fraction of examples on which our predictions disagree with the ground truth. 
@@ -162,7 +162,7 @@ In these cases, it is common instead to optimize a surrogate objective.
 During optimization, we think of the loss as a function of the model’s parameters, and treat the training dataset as a constant. We learn the best values of our model’s parameters by minimizing the loss incurred on a set consisting of some number of examples collected for training. 
 However, **doing well on the training data does not guarantee that we will do well on unseen data**. 
 
-> So we will typically want to split the available data into two partitions: t**he training dataset** (or training set), for learning model parameters; and the **test dataset** (or test set), which is held out for evaluation.
+> So we will typically want to split the available data into two partitions: <span style="color:red">**the training dataset**</span> (or training set), for learning model parameters; and the <span style="color:red">**test dataset**</span> (or test set), which is held out for evaluation.
 
 At the end of the day, we typically report how our models perform on both partitions. 
 You could think of training performance as analogous to the scores that a student achieves on the practice exams used to prepare for some real final exam. 
@@ -172,7 +172,7 @@ When a model performs well on the training set but fails to generalize to unseen
 ### Optimization Algorithms
 Once we have got some data source and representation, a model, and a well-defined objective function, we need an 
 
-> algorithm capable of searching for the best possible parameters for minimizing the loss function. 
+> algorithm capable of <span style="color:red">searching for the best possible parameters for minimizing the loss function</span>. 
 
 Popular optimization algorithms for deep learning are based on an approach called **gradient descent**. 
 In brief, at each step, this method checks to see, for each parameter, how that training set loss would change if you perturbed that parameter by just a small amount. 
