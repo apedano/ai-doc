@@ -52,5 +52,10 @@ plugins:
 nav:
   - index.md
   - Introduction:
-    - 001-introduction/index.md
-    - 001-introduction/machine-learning-problems.md
+      - 001-introduction/index.md
+      - 001-introduction/machine-learning-problems.md
+  - Preliminaries:
+      - 002-preliminaries/data-manipulation.md
+      - 002-preliminaries/pandas.md
+      - 002-preliminaries/linear-algebra.md
+      - 002-preliminaries/calculus.md

@@ -7,3 +7,6 @@ LaTeX-style mat notation using MkDocs with MathJax
 $$
 \int_0^1 x^2 dx
 $$
+
+
+https://ezgif.com/svg-to-png?utm_source=chatgpt.com
