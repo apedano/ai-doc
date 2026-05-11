@@ -25,12 +25,12 @@ This limiting procedure is at the root of both
 <span style="color:red">*differential calculus*</span> and <span style="color:red">*integral calculus*</span>. 
 
 > The former can tell us how to increase
-or decrease a function's value by
-manipulating its arguments. 
-This comes in handy for the *optimization problems*
-that we face in deep learning,
-where we repeatedly update our parameters 
-in order to decrease the loss function.
+> or decrease a function's value by
+> manipulating its arguments.
+> This comes in handy for the *optimization problems*
+> that we face in deep learning,
+> where we repeatedly update our parameters
+> in order to decrease the loss function.
 
 
 Optimization addresses how to fit our models to training data,
@@ -42,12 +42,12 @@ That problem is called *generalization* and will be a key focus of other chapter
 ## Derivatives and Differentiation
 
 > Put simply, a *derivative* is <span style="color:red"> the rate of change
-in a function with respect to changes in its arguments</span>.
+> in a function with respect to changes in its arguments</span>.
 
->Derivatives can tell us how rapidly a loss function
-would increase or decrease were we 
-to *increase* or *decrease* each parameter
-by an infinitesimally small amount.
+> Derivatives can tell us how rapidly a loss function
+> would increase or decrease were we
+> to *increase* or *decrease* each parameter
+> by an infinitesimally small amount.
 
 Formally, for functions $f: \mathbb{R} \rightarrow \mathbb{R}$,
 that map from scalars to scalars,
@@ -125,8 +125,8 @@ $$\begin{aligned} \frac{d}{dx} C & = 0 && \textrm{for any constant $C$} \\ \frac
 
 ### Derivatives rules
 
-> Functions composed from differentiable functions 
-are often themselves differentiable.
+> Functions composed from differentiable functions
+> are often themselves differentiable.
 
 
 The following rules come in handy for working with compositions of any differentiable functions 
@@ -142,12 +142,152 @@ $$\frac{d}{dx} [3 x^2 - 4x] = 3 \frac{d}{dx} x^2 - 4 \frac{d}{dx} x = 6x - 4.$$
 Plugging in $x = 1$ shows that, indeed, the derivative equals $2$ at this location. 
 Note that derivatives tell us the *slope* of a function at a particular location.
 
+### Geometrical meaning of the derivative
+
+> The derivative in a point $f'(x_0)$ is the slope $m$ of the tangent rect in $f(x_0)$
+
+$$
+f(x)=3x^2+3  \Rightarrow  f'(x)=m=6x \Rightarrow y=mx+q 
+$$
+
+So in $x_0$ we have
+
+$$f(x_0)=f'(x_0)x_0 + q$$
+
+So we have $q$
+
+$$q=f(x_0) - f'(x_0)x_0$$
+
+So per $x_0 = 2$ we have
+
+$$f(x_0)=15 \Rightarrow f'(x_0)=m=12$$
+
+$$q=15-12*2=-9 $$
+
+$$y = 12x-9 $$
+
+
+```python
+from plotting.plotter import Plotter
+
+import sympy as sp
+
+# define function
+plotter = Plotter(0, 5, (10,6), 500)
+x = plotter.x
+f = 3*x**2 + 3
+y = 12*x-9
+plotter.plot(f, label='f(x)')
+f_prime = sp.diff(f, x)
+plotter.plot(y, label='y(x)')
+# plotter.plot(f_integral, label='f_int(x)')
+plotter.show()
+```
+
+![tangent.png](img/tangent.png)
+
+![graidient_example.png](img/graidient_example.png)
+
 ## Visualization
 
-[**We can visualize the slopes of functions using the `matplotlib` library**].
-We need to define a few functions. 
-As its name indicates, `use_svg_display` tells `matplotlib` to output graphics in SVG format for crisper images. 
+A module has been creted in `modules/plotting/plotter.py` which contains a `Plotter` class to plot one or more functions.
 
-The comment `#@save` is a special modifier that allows us to save any function, 
-class, or other code block to the `d2l` package so that we can invoke it later 
-without repeating the code, e.g., via `d2l.use_svg_display()`.
+Example:
+
+```python
+from plotting.plotter import Plotter
+
+import sympy as sp
+
+# define function
+plotter = Plotter(0, 5, (10,6), 500)
+x = plotter.x
+f = x**2 -3*x
+plotter.plot(f, label='f(x)')
+f_prime = sp.diff(f, x)
+f_integral = sp.integrate(f, x)
+plotter.plot(f_prime, label='f\'(x)')
+# plotter.plot(f_integral, label='f_int(x)')
+plotter.show()
+```
+
+![img.png](img.png)
+
+> To use the class in a Juputer notebook, make sure to mark the `modules` class as **source root** and, if necessary, 
+> restart the notebook kernel.
+
+## Partial Derivatives and Gradients
+
+> Derivative applied to _multivariate_ functions
+
+Let $y = f(x_1, x_2, \ldots, x_n)$ be a function with $n$ variables. 
+
+> The <span style="color:red">*partial derivative* of $y$
+> with respect to its $i^\textrm{th}$ parameter $x_i$ is </span>
+
+$$ \frac{\partial y}{\partial x_i} = \lim_{h \rightarrow 0} \frac{f(x_1, \ldots, x_{i-1}, x_i+h, x_{i+1}, \ldots, x_n) - f(x_1, \ldots, x_i, \ldots, x_n)}{h}.$$
+
+
+To calculate $\frac{\partial y}{\partial x_i}$, we can treat $x_1, \ldots, x_{i-1}, x_{i+1}, \ldots, x_n$ as constants 
+and calculate the derivative of $y$ with respect to $x_i$. 
+
+The following notational conventions for partial derivatives 
+are all common and all mean the same thing:
+
+$$\frac{\partial y}{\partial x_i} = \frac{\partial f}{\partial x_i} = \partial_{x_i} f = \partial_i f = f_{x_i} = f_i = D_i f = D_{x_i} f.$$
+
+> We can concatenate partial derivatives of a multivariate function
+> with respect to all its variables to obtain a vector that is called
+> the <span style="color:red">*gradient*</span> of the function.
+ 
+
+Suppose that the input of function $f: \mathbb{R}^n \rightarrow \mathbb{R}$ 
+is an $n$-dimensional vector $\mathbf{x} = [x_1, x_2, \ldots, x_n]^\top$ 
+and the output is a scalar. 
+
+The gradient of the function $f$ 
+with respect to $\mathbf{x}$ 
+is a vector of $n$ partial derivatives:
+
+<span style="color:red">$$\nabla_{\mathbf{x}} f(\mathbf{x}) = \left[\partial_{x_1} f(\mathbf{x}), \partial_{x_2} f(\mathbf{x}), \ldots
+\partial_{x_n} f(\mathbf{x})\right]^\top.$$</span>
+
+When there is no ambiguity, $\nabla_{\mathbf{x}} f(\mathbf{x})$ 
+is typically replaced 
+by $\nabla f(\mathbf{x})$.
+
+### Geometrical meaning
+
+> The gradient is a $n$-dimensional vector pointing toward steepest ascent
+> whose length equals the maximum rate of increase
+
+
+_“The gradient is the multivariable version of slope.”_
+
+### Examples
+
+#### Basic Basic Polynomial $f(x,y)=x^2+3y^2$
+
+$\nabla f(x,y)=(\frac{\partial f}{\partial x},\frac{\partial f}{\partial y})=(2x, 6y)$
+
+for $(x,y)=(1,2) \Rightarrow \nabla f(1,2)=\langle 2, 12 \rangle$
+
+$ \Vert \nabla f(1,2) \Vert = \sqrt{2^2+12^2}$
+
+![gradient_polynomial.png](img/gradient_polynomial.png)
+
+
+
+### Gradient rules
+
+https://chatgpt.com/c/6a00a8d6-dec8-8333-95c5-67299b576e40
+
+The following rules come in handy for differentiating multivariate functions:
+
+* For all $\mathbf{A} \in \mathbb{R}^{m \times n}$ we have $\nabla_{\mathbf{x}} \mathbf{A} \mathbf{x} = \mathbf{A}^\top$ and $\nabla_{\mathbf{x}} \mathbf{x}^\top \mathbf{A}  = \mathbf{A}$.
+* For square matrices $\mathbf{A} \in \mathbb{R}^{n \times n}$ we have that 
+  * $\nabla_{\mathbf{x}} \mathbf{x}^\top \mathbf{A} \mathbf{x}  = (\mathbf{A} + \mathbf{A}^\top)\mathbf{x}$ and in particular
+  $\nabla_{\mathbf{x}} \|\mathbf{x} \|^2 = \nabla_{\mathbf{x}} \mathbf{x}^\top \mathbf{x} = 2\mathbf{x}$.
+
+Similarly, for any matrix $\mathbf{X}$, 
+we have $\nabla_{\mathbf{X}} \|\mathbf{X} \|_\textrm{F}^2 = 2\mathbf{X}$. 
