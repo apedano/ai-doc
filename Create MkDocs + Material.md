@@ -52,6 +52,23 @@ Example file [index.md](python-cheatsheet/docs/basics/variables.md)
 
 [mkdocs.yml](mkdocs.yml) (`nav` section)
 
+### Add Jupiter Notebook support
+
+From [here](https://github.com/danielfrg/mkdocs-jupyter)
+
+To visualize Jupiter notebooks as doc pages
+
+```shell
+pip install mkdocs-jupyter
+```
+
+in the config file:
+
+```yaml
+plugins:
+    - mkdocs-jupyter
+```
+
 ## Run locally 
 
 Target port can be specified

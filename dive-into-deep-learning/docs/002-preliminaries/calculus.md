@@ -268,9 +268,14 @@ _“The gradient is the multivariable version of slope.”_
 
 #### Basic Basic Polynomial $f(x,y)=x^2+3y^2$
 
-$\nabla f(x,y)=(\frac{\partial f}{\partial x},\frac{\partial f}{\partial y})=(2x, 6y)$
+If we build the gradient as a vector
 
-for $(x,y)=(1,2) \Rightarrow \nabla f(1,2)=\langle 2, 12 \rangle$
+$\nabla f(x,y)=\begin{bmatrix}\frac{\partial f}{\partial x} \\ \frac{\partial f}{\partial y}\end{bmatrix}=\begin{bmatrix}2x \\ 6y\end{bmatrix}$
+
+for $(x,y)=(1,2) \Rightarrow \nabla f(1,2)=\begin{bmatrix}2 \\ 12\end{bmatrix}$
+
+this means that the function on $(1,2)$ increasing x changes $f$ moderately
+increasing y changes $f$ much faster
 
 $ \Vert \nabla f(1,2) \Vert = \sqrt{2^2+12^2}$
 
@@ -280,7 +285,77 @@ $ \Vert \nabla f(1,2) \Vert = \sqrt{2^2+12^2}$
 
 ### Gradient rules
 
-https://chatgpt.com/c/6a00a8d6-dec8-8333-95c5-67299b576e40
+* **Sum Rule**: $\nabla(f+g)=\nabla f+\nabla g$
+* **Scalar multiplication:**$\nabla(cf)=c\nabla f$
+* **Product rule:**$\nabla(fg)=f\nabla g+g\nabla f$
+* **Chain rule**: given $z=f(g(x,y))$ then $\nabla z=f′(g)\nabla g$
+
+### Gradient rules for matrix
+
+Facilitate the gradient calculation for multivariate functions
+
+>$$
+\nabla(x^TAx)=(A+A^T)x
+$$
+
+Most optimization problems minimize functions like:
+
+$ f(x)=x^TAx+b^Tx+c$
+
+This appears everywhere:
+
+* least squares
+* regression
+* neural networks
+* control systems
+* physics simulations
+
+To find minima, set gradient to zero:
+
+$∇f=0$
+
+Using the rule:
+
+$Ax−b=0$ 
+
+which becomes a linear system:
+
+$Ax=b$
+
+So the gradient rule converts calculus into linear algebra.
+
+Given
+
+with $x=\begin{bmatrix}x_1 \\ x_2\end{bmatrix}$ 
+
+and $A=\begin{bmatrix}1 & 2 \\ 3 & 4\end{bmatrix}$, $b=\begin{bmatrix}5 \\ 6\end{bmatrix}$  
+
+So:
+
+$f(x)= x^T\begin{bmatrix}1 & 2 \\ 3 & 4\end{bmatrix}x+\begin{bmatrix}5 & 6\end{bmatrix}x+c$
+
+Expand it:
+
+$f(x)= \begin{bmatrix}x_1 & x_2\end{bmatrix}\begin{bmatrix}1 & 2 \\ 3 & 4\end{bmatrix}\begin{bmatrix}x_1 \\ x_2\end{bmatrix}+\begin{bmatrix}5 & 6\end{bmatrix}\begin{bmatrix}x_1 \\ x_2\end{bmatrix}+c =$
+
+$=\begin{bmatrix}x_1 & x_2\end{bmatrix}\begin{bmatrix}x_1 + 2x_2 \\ 3x_1 + 4x_2 \end{bmatrix} + 5x_1 + 6x_2 + c =$
+
+$=x_1(x_1+2x_2)+x_2(3x_1+4x_2) + 5x_1 + 6x_2 + c $
+
+So
+
+$f(x_1, x_2)=x_1^2+5x_1x_2+4x_2^2+5x_1+6x_2+c$
+
+Let's calculate the gradient
+
+$\nabla f(x,y)=\begin{bmatrix}\frac{\partial f}{\partial x} \\ \frac{\partial f}{\partial y}\end{bmatrix}=\begin{bmatrix}2x_1+5x_2+5 \\ 5x_1+8x_2+6\end{bmatrix}$
+
+The calculation can be made simpler by applying the rule
+
+$\nabla f(x,y) = \nabla {x^TAx+b^Tx+c} = \nabla {x^TAx} + \nabla {b^Tx} + \nabla {c} = $
+
+$=(A+A^T)x + b + 0 = \begin{bmatrix}2 & 5 \\ 5 & 8\end{bmatrix}\begin{bmatrix}x_1 \\ x_2\end{bmatrix} + \begin{bmatrix}5 \\ 6\end{bmatrix} = \begin{bmatrix}2x_1+5x_2+5 \\ 5x_1+8x_2+6\end{bmatrix}$
+
 
 The following rules come in handy for differentiating multivariate functions:
 

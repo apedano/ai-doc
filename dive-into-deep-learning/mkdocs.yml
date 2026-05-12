@@ -45,10 +45,12 @@ markdown_extensions:
       permalink: true
 #MathJax lib
 extra_javascript:
+  - javascripts/mathjax.js
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 plugins:
   - search
+  - mkdocs-jupyter
 nav:
   - index.md
   - Introduction:
@@ -59,3 +61,4 @@ nav:
       - 002-preliminaries/pandas.md
       - 002-preliminaries/linear-algebra.md
       - 002-preliminaries/calculus.md
+      - 002-preliminaries/automatic_differentiation.ipynb
