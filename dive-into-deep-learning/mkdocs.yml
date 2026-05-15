@@ -50,7 +50,6 @@ extra_javascript:
 
 plugins:
   - search
-  - mkdocs-jupyter
 nav:
   - index.md
   - Introduction:
@@ -61,4 +60,4 @@ nav:
       - 002-preliminaries/pandas.md
       - 002-preliminaries/linear-algebra.md
       - 002-preliminaries/calculus.md
-      - 002-preliminaries/automatic_differentiation.ipynb
+      - 002-preliminaries/probability_statistics.md
