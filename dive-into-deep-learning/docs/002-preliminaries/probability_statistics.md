@@ -494,7 +494,7 @@ when the test result is positive.
 The features of the test $B_1$ are
 
 | Conditional probability | $A=1$ | $A=0$ |
-|:------------------------|------:|------:|
+| :---------------------- | ----: | ----: |
 | $P(B_1 = 1 \mid A)$     |     1 |  0.01 |
 | $P(B_1 = 0 \mid A)$     |     0 |  0.99 |
 
@@ -518,7 +518,7 @@ As we can see, probability can be counterintuitive.
 The second test has different characteristics and it is not as good as the first one.
 
 | Conditional probability | $A=1$ | $A=0$ |
-|:------------------------|------:|------:|
+| :---------------------- | ----: | ----: |
 | $P(B_2 = 1 \mid H)$     |  0.98 |  0.03 |
 | $P(B_2 = 0 \mid H)$     |  0.02 |  0.97 |
 
@@ -580,146 +580,259 @@ $P(B)=s(A)+s(¬A)=0.1794+0.154=0.3334$
 
 Finally, we apply Beyes:
 
-$$P(A|B)=\frac{0.78*0.23}{0.3344}=0.538092382$$ 
+$$
+P(A|B)=\frac{0.78*0.23}{0.3344}=0.538092382
+$$ 
 
-~ 54% of an email with the word FREE to be spam, 
+This 54% of an email with the word FREE to be spam, 
 compared to the 23% of a random email.
 
 ## Random variables aggregations
 
-## Expectation / expected value
+### Expectation / expected value
 
 
-> 🔴 **Expectation / Expected value**: the expected value "on everage" taken by continuous scalar random variables.
+> 🔴 **Expectation / Expected value**: the expected value "on everage" taken by random variables.
  
 It answers the question: “What value should I expect on average?”
 
+For **discrete random variables**:
+
+$$
+  E[X]=\sum_i​x_i​P(X=x_i​)
+$$
+
+For **continuos random variables** (If $X$ has a probability density function $f(x)$:
+
+$$
+  E[X]=\int_{\infty}^{\infty}xf(x)
+$$
+
+#### Interpretation
+
+> I can be associated to a **wighted sum** where the value is the outcome and the weight is the probability of the outcome.
+
+> It is not necessarily a value you can observe, but a **center of mass** of the distribution.
+
+For example for a dice we have 
+
+$E[X]=\frac{1+2+3+4+5+6}{6}=3.5$ which is not a value in the sample space
+
+#### Properties
+
+| Property  | Formula                                                        |
+| --------- | -------------------------------------------------------------- |
+| Linearity | $E[aX+bY]=aE[X]+bE[Y]$ (holds if $X$ and $Y $ are independent) |
+| Constant  | $E[aX]=aE[X]$                                                  |
+| Sum       | $E[X+Y]=E[X]+E[Y]$                                             |
 
 
 
+### Variance
+
+> 🔴**Variance** measures **how far a random variable typically deviates from its mean (expectation)**. While expectation tells you the “center,” variance tells you the **spread around that center**.
+
+for a random variable $X$ with expected value $\mu=E[X] $
+
+$$
+Var = E[\sqrt{(X-\mu)^2}]
+$$
 
 
+> Variance is the **expected squared distance** from the mean
 
+#### Equivalent formula 
+
+An alternative and more easy to compute way of calculating it is
+
+$$
+Var = E[X^2]-(E[X])^2
+$$
+
+#### Interpretation
+
+If the mean (expected value) is the center of mass of the random variable, 
+
+> Then variance tells you how “tight” or “spread out” the mass is around that center
+
+* **small variance** → values cluster near the mean
+* **large variance** → values are widely spread
  
+#### Calculation example
 
-For example, when random variables take continuous scalar values, we often care about knowing what value to expect *on average*.
+For dice toss the case space is $X \in \{1,2,3,4,5,6\}$
 
+$E[X]=3.5$ and $E[X^2]=\frac{1^2+2^2 \dots+6^2}{6}=\frac{91}{6}$
 
-If we are making investments, the first quantity of interest might be the return we can expect, averaging over all the possible outcomes
-(and weighting by the appropriate probabilities).
-
-For instance, say that with 50% probability, an investment might fail altogether, with 40% probability it might provide a 2$\times$ return,
-and with 10% probability it might provide a 10$\times$ return.
+So $Var(X)=\frac{91}{6}-(3.5)^2=\frac{35}{12} \approx 2.92$
 
 
-To calculate the expected return, we sum over all returns, multiplying each by the probability that they will occur.
+#### Properties 
 
-This yields the expectation $0.5 \cdot 0 + 0.4 \cdot 2 + 0.1 \cdot 10 = 1.8$.
-Hence the expected return is 1.8$\times$.
+| Property                     | Formula                                                              |
+| ---------------------------- | -------------------------------------------------------------------- |
+| Scaling                      | $Var(aX) = aVAr(x)$                                                  |
+| Shifting                     | $Var(X+c) = Var(X)$ shifting the values does not change the variance |
+| Sum of independent variables | $Var[X+Y]=Var[X]+Var[Y]$                                             |
 
-In general, the *expectation* (or average)
-of the random variable $X$ is defined as
+### Standard deviation 
 
-$$E[X] = E_{x \sim P}[x] = \sum_{x} x P(X = x).$$
+Variance is in **squared units**, which is sometimes inconvenient.
 
-Likewise, for densities we obtain $E[X] = \int x \;dp(x)$.
-Sometimes we are interested in the expected value
-of some function of $x$.
-We can calculate these expectations as
+$$
+\sigma=\sqrt{Var(X)}
+$$
 
-$$E_{x \sim P}[f(x)] = \sum_x f(x) P(x) \textrm{ and } E_{x \sim P}[f(x)] = \int f(x) p(x) \;dx$$
+It has the same units as X.
 
-for discrete probabilities and densities, respectively.
-Returning to the investment example from above,
-$f$ might be the *utility* (happiness)
-associated with the return.
-Behavior economists have long noted
-that people associate greater disutility
-with losing money than the utility gained
-from earning one dollar relative to their baseline.
-Moreover, the value of money tends to be sub-linear.
-Possessing 100k dollars versus zero dollars
-can make the difference between paying the rent,
-eating well, and enjoying quality healthcare
-versus suffering through homelessness.
-On the other hand, the gains due to possessing
-200k versus 100k are less dramatic.
-Reasoning like this motivates the cliché
-that "the utility of money is logarithmic".
+For the die: σ≈1.71
 
-If the utility associated with a total loss were $-1$,
-and the utilities associated with returns of $1$, $2$, and $10$
-were $1$, $2$ and $4$, respectively,
-then the expected happiness of investing
-would be $0.5 \cdot (-1) + 0.4 \cdot 2 + 0.1 \cdot 4 = 0.7$
-(an expected loss of utility of 30%).
-If indeed this were your utility function,
-you might be best off keeping the money in the bank.
+### Covariance
 
-For financial decisions,
-we might also want to measure
-how *risky* an investment is.
-Here, we care not just about the expected value
-but how much the actual values tend to *vary*
-relative to this value.
-Note that we cannot just take
-the expectation of the difference
-between the actual and expected values.
-This is because the expectation of a difference
-is the difference of the expectations,
-i.e., $E[X - E[X]] = E[X] - E[E[X]] = 0$.
-However, we can look at the expectation
-of any non-negative function of this difference.
-The *variance* of a random variable is calculated by looking
-at the expected value of the *squared* differences:
+> 🔴**Covariance** measures how two random variables vary together — in other words, whether they tend to move in the same direction or in opposite directions.
 
-$$\textrm{Var}[X] = E\left[(X - E[X])^2\right] = E[X^2] - E[X]^2.$$
+It is the two-variable generalization of variance.
 
-Here the equality follows by expanding
-$(X - E[X])^2 = X^2 - 2 X E[X] + E[X]^2$
-and taking expectations for each term.
-The square root of the variance is another
-useful quantity called the *standard deviation*.
-While this and the variance
-convey the same information (either can be calculated from the other),
-the standard deviation has the nice property
-that it is expressed in the same units
-as the original quantity represented
-by the random variable.
+$$
+Cov(X,Y)=E[(X−E[X])(Y−E[Y])]
+$$
 
-Lastly, the variance of a function
-of a random variable
-is defined analogously as
+#### Interpretation
 
-$$\textrm{Var}_{x \sim P}[f(x)] = E_{x \sim P}[f^2(x)] - E_{x \sim P}[f(x)]^2.$$
+> how deviations from the mean of X and Y align
 
-Returning to our investment example,
-we can now compute the variance of the investment.
-It is given by $0.5 \cdot 0 + 0.4 \cdot 2^2 + 0.1 \cdot 10^2 - 1.8^2 = 8.36$.
-For all intents and purposes this is a risky investment.
-Note that by mathematical convention mean and variance
-are often referenced as $\mu$ and $\sigma^2$.
-This is particularly the case whenever we use it
-to parametrize a Gaussian distribution.
+Each observation is a pair $(x,y)$:
 
-In the same way as we introduced expectations
-and variance for *scalar* random variables,
-we can do so for vector-valued ones.
-Expectations are easy, since we can apply them elementwise.
-For instance, $\boldsymbol{\mu} \stackrel{\textrm{def}}{=} E_{\mathbf{x} \sim P}[\mathbf{x}]$
-has coordinates $\mu_i = E_{\mathbf{x} \sim P}[x_i]$.
-*Covariances* are more complicated.
-We define them by taking expectations of the *outer product*
-of the difference between random variables and their mean:
+If $X$ is above its mean and $Y$ is also above its mean → positive contribution
 
-$$\boldsymbol{\Sigma} \stackrel{\textrm{def}}{=} \textrm{Cov}_{\mathbf{x} \sim P}[\mathbf{x}] = E_{\mathbf{x} \sim P}\left[(\mathbf{x} - \boldsymbol{\mu}) (\mathbf{x} - \boldsymbol{\mu})^\top\right].$$
+If one is above and the other below → negative contribution
 
-This matrix $\boldsymbol{\Sigma}$ is referred to as the covariance matrix.
-An easy way to see its effect is to consider some vector $\mathbf{v}$
-of the same size as $\mathbf{x}$.
-It follows that
+So:
 
-$$\mathbf{v}^\top \boldsymbol{\Sigma} \mathbf{v} = E_{\mathbf{x} \sim P}\left[\mathbf{v}^\top(\mathbf{x} - \boldsymbol{\mu}) (\mathbf{x} - \boldsymbol{\mu})^\top \mathbf{v}\right] = \textrm{Var}_{x \sim P}[\mathbf{v}^\top \mathbf{x}].$$
+**Positive covariance** → they move together
+**Negative covariance** → they move in opposite directions
+**Zero covariance** → no linear relationship (not necessarily independent)
+
+#### Equivalent formula 
+
+
+$$
+Cov(X,Y)=E[XY]−E[X]E[Y]
+$$
+
+
+#### Connection with variance
+
+It is the covariance with itself
+
+$$
+Var(X)=Cov(X,X)
+$$
+
+#### Examples
+
+* Example 1: **height and weight**
+  * Taller people tend to weigh more
+  * → **positive covariance**
+* Example 2: **temperature and heating bill**
+  * Higher temperature → lower heating cost
+  * → **negative covariance**
+* Example 3: **unrelated variables**
+  * Dice roll and stock price
+  * → **near zero covariance**
+
+#### Correlation
+
+
+Covariance is hard to interpret because:
+
+it depends on units ($kg·cm$, $dollars·seconds$, etc.) magnitude is not standardized
+
+That’s why we often use correlation:
+
+$$
+\rho(X,Y)=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}
+$$
+
+with $\rho \in [-1,1]$
+
+#### Covariance vs Correlation
+
+* **covariance** = raw joint movement (unit-dependent)
+* **correlation** = normalized strength of linear relationship
+
+
+#### Example of correlation
+
+Intuitively: taller → heavier. So we expect positive correlation.
+
+| Person | Height (cm) (X) | Weight (kg) (Y) |
+| ------ | --------------- | --------------- |
+| A      | 160             | 55              |
+| B      | 165             | 60              |
+| C      | 170             | 65              |
+| D      | 175             | 70              |
+| E      | 180             | 75              |
+
+$E[X]=\frac{160+165+170+175+180}{5}​=170$
+
+$E[Y]=\frac{55+60+65+70+75}{5}​=65$
+
+Deviations
+
+| Person | (X - 170) | (Y - 65) |
+| ------ | --------- | -------- |
+| A      | -10       | -10      |
+| B      | -5        | -5       |
+| C      | 0         | 0        |
+| D      | 5         | 5        |
+| E      | 10        | 10       |
+
+
+Covariance $Cov(X,Y)=\frac{1}{5}\sum_{i=1}^{5}(X_i​−μX​)(Y_i​−μY​)$
+
+| Person | Product |
+| ------ | ------- |
+| A      | 100     |
+| B      | 25      |
+| C      | 0       |
+| D      | 25      |
+| E      | 100     |
+
+
+So 
+
+$$
+Cov(X,Y)=250/5=50 > 0
+$$
+
+They grow together
+
+$Var(X)=250/5=50 ⇒ σ_X​=\sqrt{50}$
+
+$Var(Y)=50 ⇒ σ_Y​=\sqrt{50}$
+
+Correlation
+
+$$
+\rho(X,Y)=\frac{Cov(X,Y)}{\sigma_X\sigma_Y}=\frac{50}{\sqrt{50}\sqrt{50}}=1
+$$
+
+> 1 means perfect positive linear relationship
+
+> With more noisy values the correlation would be still positive but something around 0.95
+
+
+### Covariance matrix
+
+https://chatgpt.com/c/6a086f76-8e90-832d-a3b7-63b4ecf37789
+
+
+
+
+
+
+
 
 As such, $\boldsymbol{\Sigma}$ allows us to compute the variance
 for any linear function of $\mathbf{x}$
