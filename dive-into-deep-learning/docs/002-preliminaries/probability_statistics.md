@@ -559,33 +559,62 @@ insight is gained from running the same test again.
 > This because we tend to ignore the role of the prior probability into the picture.
 > Bayes shows why that's wrong.
 
-# ADD SPAM TEST FILTER
+#### ADD SPAM TEST FILTER
+
+We have a spam filter, we want to know what is the probability of an email containing the work "FREE"
+will be considered spam.
+
+What happen if there is an email with the word FREE
+
+* **Prior probability $P(A)=0.23$**: the probability of an email assigned to SPAM
+* **Evidence $P(B) = ?$**:  the probability of an email containing the word FREE is unknown
+* **Likelihood $P(B|A) = 0.78$**:  the probability of the word FREE in a spam email
+* **Likelihood $P(B|¬A) = 0.2$**: the probability of the word FREE in a spam email
+
+Target: $P(A|B) = \frac{P(B | A)P(A)}{P(B)}=\frac{s(A)}{s(A)+s(¬A)}$
+
+* **score of spam filter: $P(B|A)*P(A) = 0.78 * 0.23 = 0.1794$**: true positive contribution
+* **score of spam filter: $P(B|¬A)*P(¬A) = 0.2 * (1-0.23) = 0.154$**: the false positive contribution
+
+$P(B)=s(A)+s(¬A)=0.1794+0.154=0.3334$
+
+Finally, we apply Beyes:
+
+$$P(A|B)=\frac{0.78*0.23}{0.3344}=0.538092382$$ 
+
+~ 54% of an email with the word FREE to be spam, 
+compared to the 23% of a random email.
+
+## Random variables aggregations
+
+## Expectation / expected value
+
+
+> 🔴 **Expectation / Expected value**: the expected value "on everage" taken by continuous scalar random variables.
+ 
+It answers the question: “What value should I expect on average?”
 
 
 
-## Expectations
 
-Often, making decisions requires not just looking
-at the probabilities assigned to individual events
-but composing them together into useful aggregates
-that can provide us with guidance.
-For example, when random variables take continuous scalar values,
-we often care about knowing what value to expect *on average*.
-This quantity is formally called an *expectation*.
-If we are making investments,
-the first quantity of interest
-might be the return we can expect,
-averaging over all the possible outcomes
+
+
+
+ 
+
+For example, when random variables take continuous scalar values, we often care about knowing what value to expect *on average*.
+
+
+If we are making investments, the first quantity of interest might be the return we can expect, averaging over all the possible outcomes
 (and weighting by the appropriate probabilities).
-For instance, say that with 50% probability,
-an investment might fail altogether,
-with 40% probability it might provide a 2$\times$ return,
-and with 10% probability it might provide a 10$\times$ return 10$\times$.
-To calculate the expected return,
-we sum over all returns, multiplying each
-by the probability that they will occur.
-This yields the expectation
-$0.5 \cdot 0 + 0.4 \cdot 2 + 0.1 \cdot 10 = 1.8$.
+
+For instance, say that with 50% probability, an investment might fail altogether, with 40% probability it might provide a 2$\times$ return,
+and with 10% probability it might provide a 10$\times$ return.
+
+
+To calculate the expected return, we sum over all returns, multiplying each by the probability that they will occur.
+
+This yields the expectation $0.5 \cdot 0 + 0.4 \cdot 2 + 0.1 \cdot 10 = 1.8$.
 Hence the expected return is 1.8$\times$.
 
 In general, the *expectation* (or average)
