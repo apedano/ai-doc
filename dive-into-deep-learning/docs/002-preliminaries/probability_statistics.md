@@ -827,6 +827,172 @@ $$
 
 https://chatgpt.com/c/6a086f76-8e90-832d-a3b7-63b4ecf37789
 
+> The covariant matrix organizes covanriances of a set of random variables that are representable in a vector.
+
+
+Given a vector of random variables:
+
+$$
+X=\begin{bmatrix} X_1 \\ X_2 \\ \vdots \\ X_n \end{bmatrix}
+$$
+
+The covariance matrix is:
+
+$$
+\Sigma=\begin{bmatrix} Var(X_1X_1) && Cov(X_1X_2) && \dots  && Cov(X_1X_n) \\
+\dots && \ddots && \dots  && \dots \\
+Cov(X_nX_1) &&  \dots  && \dots && Var(X_nX_n) \\
+\end{bmatrix}
+$$
+
+❗ Since $Cov(X,Y)=Cov(Y,X)$, the matrix is **always symmetric**
+
+#### Geometric meaning (very important intuition)
+
+* **variance** = spread along an axis
+* **covariance** = how two axes “tilt together”
+
+So the covariance matrix describes:
+
+
+What it looks like visually
+* If variables are independent → matrix is diagonal (off diagonal is zero)
+* If strongly correlated → off-diagonal terms are large
+* If negatively correlated → off-diagonal is negative
+
+## Chebyshev inequality
+
+> For **any distribution**, given random variable $X$ with $\mu=E[X]$ = and variance $\sigma^2=Var(X)$. Then for any $\epsilon>0$ we have 
+> $$P(|X-\mu|\geq\epsilon)\leq\frac{\sigma^2}{\epsilon^2}$$
+ 
+This means that the probability that $X$ deviates from its mean by at least ε is at most 
+$\frac{Var(X)}{\epsilon^2}$ 
+
+### Alternative form
+
+$$P(|X-\mu|<\epsilon)\geq1-\frac{\sigma^2}{\epsilon^2}$$
+
+This says:
+
+> at least this much probability lies within a band around the mean
+
+### Example
+
+Given a distribution with $\mu=10$ and $\sigma^2=4$
+
+_We want to know the probability the $X$ is 6 units far from the mean_: so $\epsilon=6$
+
+We apply 
+
+$$P(|X-10|\geq6)\leq\frac{4}{36}=\frac{1}{9}$$
+
+therefore
+
+$$P(|X-10|\leq6)\geq\frac{8}{9}$$
+
+Even without knowing the distribution!
+
+## Main random distributions for discrete random variable
+
+https://chatgpt.com/c/6a09d5f8-a8b4-8326-ae61-41f92be6fac8
+https://gemini.google.com/app/21d3f65f50300ea2
+
+### Bernoulli $X∼Bern(p)$
+
+📌 Single trial with binary outcomes: Success" (1) with probability $p$, or "Failure" (0) with probability $q = 1 - p$
+
+📝 Tossing a biased coin; a software deployment either succeeding or failing.
+
+#### Probability Mass Function (PMF): $P(X = x) = p^x (1-p)^{1-x}$ for $x \in \{0, 1\}$
+
+#### Expected Value 
+
+$$E[X] = \sum x \cdot P(X=x) = (0 \cdot (1-p)) + (1 \cdot p) = p$$
+
+
+#### Variance
+
+Using the identity $Var(X) = E[X^2] - (E[X])^2$
+
+$$E[X]=p$$
+
+$$E[X^2] = (0^2 \cdot (1-p)) + (1^2 \cdot p) = p = E[X]$$
+
+$$Var(X) = p - p^2 = p(1-p)$$
+
+### Binomial $X∼Bin(n,p)$
+
+📌 Models the number of successes in $n$ independent and identically distributed (i.i.d.) Bernoulli trials.
+
+📝 The number of defective items in a batch of 100; the number of successful web requests out of 50 attempts; one tail only on n coin tosses
+
+#### PMF: $P(X = x) = \binom{n}{x} p^x (1-p)^{n-x}$ for $x \in \{0, 1, \dots, n\}$
+
+where $\binom{n}{x}=\frac{n!}{x!(n-x)!}$ number of groups of $x$ elements over $n$ elements ignoring the order. (\(2\) people (x) from a group of (5) friends (n)). The single element success probabiliy is $p$
+
+> Binomial variable is the sum of $n$ independent Bernoulli variables ($X = Y_1 + Y_2 + \dots + Y_n$):
+
+#### Expected Value 
+
+Using linearity
+
+$$E[X] = E\left[\sum_{i=1}^n Y_i\right] = \sum_{i=1}^n E[Y_i] = \sum_{i=1}^n p = np$$
+
+#### Variance
+
+Since the trials are independent, the variances add up directly:
+
+$$Var(X) = Var\left[\sum_{i=1}^n Y_i\right] = \sum_{i=1}^n Var[Y_i] = \sum_{i=1}^n p(1-p) = np(1-p)$$
+
+### Poisson $X∼Pois(λ)$
+
+📌 Models the number of events occurring within a fixed interval of time or space, assuming these events occur with a known constant average rate $\lambda$ and independently of the time since the last event (frequencies).
+
+📝 The number of users visiting a website server per minute; the number of network packet drops per hour.
+
+
+### PMF:
+
+$P(X = x) = \frac{\lambda^x e^{-\lambda}}{x!}$ for $x \in \{0, 1, 2, \dots\}$
+
+#### Expected value
+
+$$E[X] = \sum_{x=0}^{\infty} x \frac{\lambda^x e^{-\lambda}}{x!} = \lambda e^{-\lambda} \sum_{x=1}^{\infty} \frac{\lambda^{x-1}}{(x-1)!}$$
+
+Let $k = x - 1$. 
+
+The sum becomes the **Taylor series** for $e^\lambda$: 
+
+$\sum_{k=0}^{\infty} \frac{\lambda^k}{k!} = e^\lambda$. So
+
+$$E[X] = \lambda e^{-\lambda} (e^\lambda) = \lambda$$
+
+#### Variance
+
+$$Var(X) = E[X^2] - (E[X])^2=E[X^2] - E[X] +E[X] - (E[X])^2 = E[X(X-1)] + +E[X] - (E[X])^2$$
+
+$$E[X(X-1)] = \sum_{x=0}^{\infty} x(x-1) \frac{\lambda^x e^{-\lambda}}{x!} = \lambda^2 e^{-\lambda} \sum_{x=2}^{\infty} \frac{\lambda^{x-2}}{(x-2)!} = \lambda^2 e^{-\lambda}(e^\lambda) = \lambda^2$$
+
+Since $E[X^2] = E[X(X-1)] + E[X] = \lambda^2 + \lambda$:
+
+$$Var(X) = E[X^2] - (E[X])^2 = (\lambda^2 + \lambda) - \lambda^2 = \lambda$$
+
+
+### Geometric $X∼Geom(p)$
+
+https://gemini.google.com/app/21d3f65f50300ea2
+
+📌 The Geometric distribution models the number of independent Bernoulli trials needed to get the first success.
+
+📝 Tossing a coin repeatedly until you get your first "Heads"; a user refreshing a congested webpage until it finally loads; a salesperson making cold calls until they close their first sale.
+
+### PMF: 
+
+For the first success to occur on trial $x$, you must have exactly $x-1$ consecutive failures followed by a single success.
+
+$$P(X = x) = (1-p)^{x-1}p \quad \text{for } x \in \{1, 2, 3, \dots\}$$
+
+(Where $p$ is the probability of success on any given trial, and $q = 1-p$ is the probability of failure).
 
 
 
@@ -834,87 +1000,8 @@ https://chatgpt.com/c/6a086f76-8e90-832d-a3b7-63b4ecf37789
 
 
 
-As such, $\boldsymbol{\Sigma}$ allows us to compute the variance
-for any linear function of $\mathbf{x}$
-by a simple matrix multiplication.
-The off-diagonal elements tell us how correlated the coordinates are:
-a value of 0 means no correlation,
-where a larger positive value
-means that they are more strongly correlated.
 
-## Discussion
 
-In machine learning, there are many things to be uncertain about!
-We can be uncertain about the value of a label given an input.
-We can be uncertain about the estimated value of a parameter.
-We can even be uncertain about whether data arriving at deployment
-is even from the same distribution as the training data.
 
-By *aleatoric uncertainty*, we mean uncertainty
-that is intrinsic to the problem,
-and due to genuine randomness
-unaccounted for by the observed variables.
-By *epistemic uncertainty*, we mean uncertainty
-over a model's parameters, the sort of uncertainty
-that we can hope to reduce by collecting more data.
-We might have epistemic uncertainty
-concerning the probability
-that a coin turns up heads,
-but even once we know this probability,
-we are left with aleatoric uncertainty
-about the outcome of any future toss.
-No matter how long we watch someone tossing a fair coin,
-we will never be more or less than 50% certain
-that the next toss will come up heads.
-These terms come from mechanical modeling,
-(see e.g., :citet:`Der-Kiureghian.Ditlevsen.2009` for a review on this aspect
-of [uncertainty quantification](https://en.wikipedia.org/wiki/Uncertainty_quantification)).
-It is worth noting, however, that these terms constitute a slight abuse of language.
-The term *epistemic* refers to anything concerning *knowledge*
-and thus, in the philosophical sense, all uncertainty is epistemic.
 
-We saw that sampling data from some unknown probability distribution
-can provide us with information that can be used to estimate
-the parameters of the data generating distribution.
-That said, the rate at which this is possible can be quite slow.
-In our coin tossing example (and many others)
-we can do no better than to design estimators
-that converge at a rate of $1/\sqrt{n}$,
-where $n$ is the sample size (e.g., the number of tosses).
-This means that by going from 10 to 1000 observations (usually a very achievable task)
-we see a tenfold reduction of uncertainty,
-whereas the next 1000 observations help comparatively little,
-offering only a 1.41 times reduction.
-This is a persistent feature of machine learning:
-while there are often easy gains, it takes a very large amount of data,
-and often with it an enormous amount of computation, to make further gains.
-For an empirical review of this fact for large scale language models see :citet:`Revels.Lubin.Papamarkou.2016`.
 
-We also sharpened our language and tools for statistical modeling.
-In the process of that we learned about conditional probabilities
-and about one of the most important equations in statistics---Bayes' theorem.
-It is an effective tool for decoupling information conveyed by data
-through a likelihood term $P(B \mid A)$ that addresses
-how well observations $B$ match a choice of parameters $A$,
-and a prior probability $P(A)$ which governs how plausible
-a particular choice of $A$ was in the first place.
-In particular, we saw how this rule can be applied
-to assign probabilities to diagnoses,
-based on the efficacy of the test *and*
-the prevalence of the disease itself (i.e., our prior).
-
-Lastly, we introduced a first set of nontrivial questions
-about the effect of a specific probability distribution,
-namely expectations and variances.
-While there are many more than just linear and quadratic
-expectations for a probability distribution,
-these two already provide a good deal of knowledge
-about the possible behavior of the distribution.
-For instance, [Chebyshev's inequality](https://en.wikipedia.org/wiki/Chebyshev%27s_inequality)
-states that $P(|X - \mu| \geq k \sigma) \leq 1/k^2$,
-where $\mu$ is the expectation, $\sigma^2$ is the variance of the distribution,
-and $k > 1$ is a confidence parameter of our choosing.
-It tells us that draws from a distribution lie
-with at least 50% probability
-within a $[-\sqrt{2} \sigma, \sqrt{2} \sigma]$
-interval centered on the expectation.
