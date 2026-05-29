@@ -35,15 +35,20 @@ class Plotter:
     num : int, optional
         Number of samples to generate. Default is 50. Must be non-negative.
     """
-    def __init__(self, start, stop, figsize: ArrayLike=(10,6), num=50):
+
+    def __init__(self, start, stop, figsize: ArrayLike = (10, 6), num=50):
         plt.figure(figsize=figsize)
         plt.axhline(0, color='black', linewidth=0.5)
         self._xlinespace = np.linspace(start, stop, num)
         self.x = sp.symbols('x')
 
+    def plot(self, fun, label=None):
 
-    def plot(self,fun, label:str):
-        # convert symbolic expressions to numerical functions
+        if isinstance(fun, list):
+            for f, lbl in zip(fun, label):
+                self.plot(f, lbl)
+            return
+
         f_num = sp.lambdify(self.x, fun, 'numpy')
         plt.plot(self._xlinespace, f_num(self._xlinespace), label=label)
 

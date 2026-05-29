@@ -59,5 +59,9 @@ nav:
       - 002-preliminaries/data-manipulation.md
       - 002-preliminaries/pandas.md
       - 002-preliminaries/linear-algebra.md
+      - 002-preliminaries/eigencomposition.md
       - 002-preliminaries/calculus.md
+      - 002-preliminaries/automatic_differentiation.md
       - 002-preliminaries/probability_statistics.md
+  - Linear neural networks for regression:
+      - 003-linear_neural_networks_for_regression/linear_regression.md

@@ -663,3 +663,82 @@ the Frobenius norm of a matrix.
 ```python
 torch.norm(torch.ones((4, 9))) #tensor(6.)
 ```
+
+### Matrix rank
+
+> The rank of a matrix is the number of linearly independent rows (or columns) it contains.
+
+#### Calculate the rank with Row Reduction (Gaussian Elimination)
+
+> Convert the matrix to Row Echelon Form (REF) and count the non-zero rows.
+
+Example:
+
+```text
+A = | 1  2  3 |
+    | 2  4  6 |
+    | 1  0  1 |
+```
+
+Starting from the first row, we make the $A(2,1)=0$ and $A(3,1)=0$
+
+R2 → R2 - 2·R1 gives [0, 0, 0]
+R3 → R3 - R1 gives [0, -2, -2]
+
+```text
+| 1  2  3 |
+| 0 -2 -2 |   ← 2 non-zero rows → rank = 2
+| 0  0  0 |
+```
+
+> The full zeros row means that a row/columm can be obtained with a linear combination of row/column 
+
+In code
+```python
+import numpy as np
+A = np.array([[1, 2, 3], [2, 4, 6], [1, 0, 1]])
+print(np.linalg.matrix_rank(A))  # Output: 2
+```
+
+Full rank example
+
+```text
+A = | 2   4  -2 |
+    | 4   9  -3 |
+    | -2  -3   7 |
+```
+
+First step
+
+$R2 → R2 − 2·R1$ and $R3 → R3 − (−2/2)·R1 = R3 + 1·R1$
+
+```text
+| 2   4  -2 |
+| 0   1   1 |
+| 0   1   5 |
+```
+Second step
+
+Make that $A[3,2] = 0$
+
+$R3 → R3 − (1/1)·R2 = R3 − R2$
+
+```text
+| 2   4  -2 |
+| 0   1   1 |
+| 0   0   4 |  ← REF achieved, no zero row, rank 3
+```
+
+```python
+import numpy as np
+A = np.array([[2, 4, -2], [4, 9, -3], [-2, -3, 7]])
+print(np.linalg.matrix_rank(A))  # Output: 3
+```
+
+> If $rank(A) == number\_of\_rows$ then the matrix is called <span style="color:red">**full rank**</span>
+
+### Eingen values eigen vectors
+
+TBD
+
+https://claude.ai/chat/1a371108-2d6b-4708-86d4-a6434e9ade58

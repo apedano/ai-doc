@@ -413,6 +413,14 @@ For example:
 * $B$ = HIV test either positive ($B1$ or $B=1$) or negative ($B0$)
 * Our target is to estimate posterior probability $P(A \mid B)$ that is the probability of HIV, given test results
 
+### Conjunction Probability and Conditional Probability
+
+
+$$P(A,B)=P(A \cap B)=P(A)P(B|A)$$
+
+$$ P(B|A)=\frac{P(A \cap B)}{P(A)}$$
+
+
 ### Bayes' theorem
 
 $$P(A \mid B) = \frac{P(B\mid A) P(A)}{P(B)}.$$
@@ -825,8 +833,6 @@ $$
 
 ### Covariance matrix
 
-https://chatgpt.com/c/6a086f76-8e90-832d-a3b7-63b4ecf37789
-
 > The covariant matrix organizes covanriances of a set of random variables that are representable in a vector.
 
 
@@ -893,9 +899,6 @@ $$P(|X-10|\leq6)\geq\frac{8}{9}$$
 Even without knowing the distribution!
 
 ## Main random distributions for discrete random variable
-
-https://chatgpt.com/c/6a09d5f8-a8b4-8326-ae61-41f92be6fac8
-https://gemini.google.com/app/21d3f65f50300ea2
 
 ### Bernoulli $X∼Bern(p)$
 
@@ -969,7 +972,7 @@ $$E[X] = \lambda e^{-\lambda} (e^\lambda) = \lambda$$
 
 #### Variance
 
-$$Var(X) = E[X^2] - (E[X])^2=E[X^2] - E[X] +E[X] - (E[X])^2 = E[X(X-1)] + +E[X] - (E[X])^2$$
+$$Var(X) = E[X^2] - (E[X])^2=E[X^2] - E[X] +E[X] - (E[X])^2 = E[X(X-1)] + E[X] - (E[X])^2$$
 
 $$E[X(X-1)] = \sum_{x=0}^{\infty} x(x-1) \frac{\lambda^x e^{-\lambda}}{x!} = \lambda^2 e^{-\lambda} \sum_{x=2}^{\infty} \frac{\lambda^{x-2}}{(x-2)!} = \lambda^2 e^{-\lambda}(e^\lambda) = \lambda^2$$
 
@@ -979,8 +982,6 @@ $$Var(X) = E[X^2] - (E[X])^2 = (\lambda^2 + \lambda) - \lambda^2 = \lambda$$
 
 
 ### Geometric $X∼Geom(p)$
-
-https://gemini.google.com/app/21d3f65f50300ea2
 
 📌 The Geometric distribution models the number of independent Bernoulli trials needed to get the first success.
 
@@ -993,6 +994,169 @@ For the first success to occur on trial $x$, you must have exactly $x-1$ consecu
 $$P(X = x) = (1-p)^{x-1}p \quad \text{for } x \in \{1, 2, 3, \dots\}$$
 
 (Where $p$ is the probability of success on any given trial, and $q = 1-p$ is the probability of failure).
+
+#### Expected value
+
+By definition
+
+$$E[X] = \sum_{x=1}^{\infty} x \cdot (1-p)^{x-1}p = p \sum_{x=1}^{\infty} x q^{x-1} \:\: (\alpha)$$
+
+Knowing that the geometric series converges for $-1 < q < 1$
+
+$$\sum_{x=0}^{\infty} q^x=\frac{1}{1-q}$$
+
+because
+
+$$\sum_{x=0}^{\infty} q^x=1 + x + x^2 \dots = S$$
+
+If we multiplicate both for $x$ we have
+
+$$qS=q(1 + q + q^2 \dots)=\sum_{x=0}^{\infty}q^x-1=S-1$$
+
+So 
+
+$$qS=S-1 \Rightarrow S=\frac{1}{1-q}$$
+
+Now calculate $$\frac{d}{dq}\left( \sum_{x=0}^{\infty} q^x \right) = \frac{d}{dq}\left( \frac{1}{1-q} \right)$$
+
+So 
+
+$$\sum_{x=1}^{\infty} xq^{x-1}=\frac{1}{(1-q)^2}=\frac{1}{p^2}$$
+
+Therefore from $\alpha$
+
+$$E[X] = p \cdot \left(\frac{1}{p^2}\right) = \frac{1}{p}$$
+
+Intuition: If a game has a 10% chance of winning ($p = 0.1$), you would expect to play $\frac{1}{0.1} = 10$ times to see your first win.
+
+### Variance
+
+First, we calculate the factorial moment $E[X(X-1)]$:
+
+$$E[X(X-1)] = p\sum_{x=1}^{\infty} x(x-1)q^{x-1}=pq\sum_{x=2}^{\infty} x(x-1)q^{x-2}$$
+
+But we know that $\sum_{x=2}^{\infty} x(x-1) q^{x-2}$ is the second derivative of the geometric series $\sum q^x$:
+
+$$\frac{d^2}{dq^2}\left( \frac{1}{1-q} \right) = \frac{2}{(1-q)^3} = \frac{2}{p^3}$$
+
+Therefore
+
+$$E[X(X-1)]=pq\frac{2}{p^3}=\frac{2q}{p^2}$$
+
+Since $E[X^2] = E[X(X-1)] + E[X]$:
+
+$$E[X^2] = \frac{2q}{p^2} + \frac{1}{p}=\frac{2q+p}{p^2}$$
+
+Now we can calculate:
+
+$Var(X) = E[X^2] - (E[X])^2 = \frac{2q+p}{p^2} - \frac{1}{p^2} = \frac{2q+p-1}{p^2}=\frac{q}{p^2}=\frac{1-p}{p^2}$
+
+$$Var(X)=\frac{1-p}{p^2}$$
+
+## Continuous Probability Distributions
+
+### Uniform Distribution
+
+📌 All outcomes in a continuous interval $[a, b]$ are equally likely.
+
+📝The waiting time for a bus that arrives strictly every 10 minutes; quantization error in digital signal processing
+
+#### Probability Density Function (PDF)
+
+$f(x) = \frac{1}{b-a}$ for $a \le x \le b$
+
+#### Expected value
+
+$$E[X] = \int_{a}^{b} xf(x) \frac{1}{b-a} dx$$
+
+$$E[X] = \int_{a}^{b} x \frac{1}{b-a} dx = \frac{1}{b-a} \left[ \frac{x^2}{2} \right]_a^b = \frac{b^2 - a^2}{2(b-a)} = \frac{a+b}{2}$$
+
+#### Variance
+
+$$E[X^2] = \int_{a}^{b} x^2 \frac{1}{b-a} dx = \frac{b^3 - a^3}{3(b-a)} = \frac{a^2 + ab + b^2}{3}$$
+
+$$Var(X) = E[X^2] - (E[X])^2 = \frac{a^2 + ab + b^2}{3} - \frac{a^2 + 2ab + b^2}{4} = \frac{(b-a)^2}{12}$$
+
+### Exponenzial distribution
+
+📌 Models the time or distance between independent events occurring at a constant average rate $\lambda$. It is famous for its memoryless property.
+
+📝 The lifespan of a computer component; the time you wait until the next notification rings on your phone.
+
+#### PDF: 
+
+$f(x) = \lambda e^{-\lambda x}$ for $x \ge 0$
+
+
+Calculations (using Integration by Parts $\int u \, dv = uv - \int v \, du$)
+
+#### Expected Value 
+
+$$E[X] = \int_{0}^{\infty} x \lambda e^{-\lambda x} dx$$
+
+Set $u = x \implies du = dx$, and $dv = \lambda e^{-\lambda x} dx \implies v = -e^{-\lambda x}$
+
+$$E[X] = \left[ -xe^{-\lambda x} \right]_0^\infty - \int_{0}^{\infty} (-e^{-\lambda x}) dx = 0 + \left[ -\frac{1}{\lambda} e^{-\lambda x} \right]_0^\infty = \frac{1}{\lambda}$$
+
+#### Variance 
+
+Evaluating $E[X^2]$ via integration by parts twice yields $E[X^2] = \frac{2}{\lambda^2}$
+
+$$Var(X) = E[X^2] - (E[X])^2 = \frac{2}{\lambda^2} - \left(\frac{1}{\lambda}\right)^2 = \frac{1}{\lambda^2}$$
+
+### Normal (Gaussian) Distribution
+
+📌 The symmetric, bell-shaped distribution central to statistics due to the Central Limit Theorem, which states that the sum of many independent random variables tends toward a normal distribution, regardless of their original distribution
+
+📝 Human heights; physical measurement errors; sensor noise.
+
+#### PDF: 
+
+$f(x) = \frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}$
+
+#### Expected Value: 
+
+$E[X] = \mu$ (The center of symmetry).
+
+#### Variance
+
+$Var(X) = \sigma^2$ (Dictates the width of the bell).
+
+#### Plot
+
+```python
+def normal(x, mu, sigma):
+    return (
+        1 / (sp.sqrt(2 * sp.pi) * sigma)
+        * sp.exp(-((x - mu) ** 2) / (2 * sigma ** 2))
+    )
+```
+We can plot three different normal distro with 
+$(\mu=0, \sigma=1)$, $(\mu=0, \sigma=2)$ and $(\mu=3, \sigma=1)$  
+
+```python
+from statistics.distributions import normal
+from plotting.plotter import Plotter
+
+params = [(0, 1), (0, 2), (3, 1)]
+
+plotter = Plotter(-7, 7, (10, 6), 500)
+
+x = plotter.x
+
+
+plotter.plot(
+    [normal(x, mu, sigma) for mu, sigma in params],
+    [f"mean={mu}, std={sigma}" for mu, sigma in params]
+)
+
+plotter.show()
+```
+![three_normals.png](img/three_normals.png)
+
+We see how the larger standard variation makes the curve flatter and the mean shifts the 
+curve over the x axis.
+
 
 
 
