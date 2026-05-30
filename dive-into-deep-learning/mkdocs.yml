@@ -65,3 +65,5 @@ nav:
       - 002-preliminaries/probability_statistics.md
   - Linear neural networks for regression:
       - 003-linear_neural_networks_for_regression/linear_regression.md
+  - Linear neural networks for classification:
+      - 004-linear_neural_networks_for_classificatin/softmax_regression.md
