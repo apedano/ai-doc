@@ -32,8 +32,6 @@ This problem is commonly known as <span style="color:red">**multi-label classifi
 
 ## Classification
 
-:label:`subsec_classification-problem`
-
 Let's start with a simple **image classification problem**.
 
 Here, each input consists of a $2\times2$ grayscale image.
@@ -117,7 +115,7 @@ depends on every input, $x_1$, $x_2$, $x_3$, and $x_4$,
 the output layer can also be described as a *fully connected layer*.
 
 ![Softmax regression is a single-layer neural network.](./img/softmaxreg.svg)
-:label:`fig_softmaxreg`
+
 
 For a more concise notation we use vectors and matrices:
 
@@ -128,58 +126,191 @@ $\mathbf{b} \in \mathbb{R}^3$ in a vector.
 
 To summerize
 
-| Categories (one-hot encoding)   | Features (#pixels)              | Weights                           | Bias                            |
-|---------------------------------|---------------------------------|-----------------------------------|---------------------------------|
-| $\mathbf{o} \in \mathbb{R}^{m}$ | $\mathbf{X} \in \mathbb{R}^{n}$ | $\mathbf{W} \in \mathbb{R}^{m,n}$ | $\mathbf{o} \in \mathbb{R}^{m}$ |
+| Categories/classes (one-hot encoding vectors) | Input Features (#pixels)        | Weight matrix                     | Bias                            |
+|-----------------------------------------------|---------------------------------|-----------------------------------|---------------------------------|
+| $\mathbf{o} \in \mathbb{R}^{K}$               | $\mathbf{X} \in \mathbb{R}^{d}$ | $\mathbf{W} \in \mathbb{R}^{K,d}$ | $\mathbf{b} \in \mathbb{R}^{K}$ |
 
 ### The Softmax
-:label:`subsec_softmax_operation`
 
-Assuming a suitable loss function,we could try, directly, to minimize the difference
-between $\mathbf{o}$ and the labels $\mathbf{y}$.
+The problem with this approach is that every single layer network output, called <span style="color: red">**logit**</span>
+will be of type $o=\left[2.5,0.3,−1.2\right]$
 
-While it turns out that treating classification as a vector-valued regression problem works surprisingly well,
-it is nonetheless unsatisfactory in the following ways:
+Therefore, <span style="color: red">**logits are not representation of probabilities**</span>:
+- $o_i \not\in \left[0,1\right] $
+- $\sum_io_i \not= 1$
 
-* There is no guarantee that the outputs $o_i$ sum up to $1$ in the way we expect probabilities to behave.
-* There is no guarantee that the outputs $o_i$ are even nonnegative, even if their outputs sum up to $1$, or that they do not exceed $1$.
 
-Both aspects render the estimation problem difficult to solve
-and the solution very brittle to outliers.
-For instance, if we assume that there
-is a positive linear dependency
-between the number of bedrooms and the likelihood
-that someone will buy a house,
-the probability might exceed $1$
-when it comes to buying a mansion!
-As such, we need a mechanism to "squish" the outputs.
+We want every vector $O$ to represent the classification probabilities for each category, given the input features $X$, 
+excluding negative values too.
+
+
 
 ## The $softmax$ function
 
-> A way to accomplish this goal
-(and to ensure nonnegativity) is to use
-an exponential function $P(y = i) \propto \exp o_i$.
-This does indeed satisfy the requirement
-that the conditional class probability
-increases with increasing $o_i$, it is monotonic,
-and all probabilities are nonnegative.
+> Softmax transforms logits into probabilities:
+> This does indeed satisfy the requirement
+> that the conditional class probability
+> increases with increasing $o_i$, it is monotonic,
+> and all probabilities are nonnegative.
+
 We can then transform these values so that they add up to $1$
 by dividing each by their sum.
 This process is called *normalization*.
 Putting these two pieces together
 gives us the *softmax* function:
 
-$$\hat{\mathbf{y}} = \mathrm{softmax}(\mathbf{o}) \quad \textrm{where}\quad \hat{y}_i = \frac{\exp(o_i)}{\sum_j \exp(o_j)}.$$
-:eqlabel:`eq_softmax_y_and_o`
+$$\hat{\mathbf{y}} = \mathrm{softmax}(\mathbf{o}) \quad \textrm{where}\quad \hat{y}_i = \frac{\exp(o_i)}{\sum_{j=1}^K \exp(o_j)}.$$
 
-Note that the largest coordinate of $\mathbf{o}$
-corresponds to the most likely class according to $\hat{\mathbf{y}}$.
-Moreover, because the softmax operation
-preserves the ordering among its arguments,
-we do not need to compute the softmax
-to determine which class has been assigned the highest probability. Thus,
+
+> Note that the largest coordinate of $\mathbf{o}$
+> corresponds to the most likely class according to $\hat{\mathbf{y}}$.
+
+Moreover, because the softmax operation preserves the ordering among its arguments,
+we do not need to compute the softmax to determine which class has been assigned the highest probability. 
+
+Thus,
 
 $$
 \operatorname*{argmax}_j \hat y_j = \operatorname*{argmax}_j o_j.
 $$
+
+So, in terms of matrices
+
+$$ \begin{aligned} \mathbf{O} &= \mathbf{X} \mathbf{W} + \mathbf{b}, \\ \hat{\mathbf{Y}} & = \mathrm{softmax}(\mathbf{O}). \end{aligned} $$
+:eqlabel:`eq_minibatch_softmax_reg`
+
+### Example
+
+Suppose we have $o=\left[2.5,0.3,−1.2 \right]$, 
+
+so $e^o=\left[e^{2.5},e^{0.3},e^{−1.2} \right]=\left[12.18,1.35,0.30\right]$
+
+we have $\sum_{j=1}^Ko_i=13.83$
+
+so  $\hat y=\operatorname*{softmax}(o)=\left[\frac{12.18}{13.83},\frac{1.35}{13.83},\frac{0.30}{13.83}\right]=\left[0.88,0.10,0.02\right]$
+
+if the one hot vector categoris are
+
+| Class | One-hot vector |
+| ----- |----------------|
+| Cat   | $[1,0,0]$      |
+| Dog   | $[0,1,0]$      |
+| Bird  | $[0,0,1]$      |
+
+Now we have a probability vector saying that Cat is with the highest change of 88% and Dog is 10%.
+
+## Loss Function
+
+Now that we have a mapping from features $\mathbf{x}$
+to probabilities $\mathbf{\hat{y}}$,
+we need a way to optimize the accuracy of this mapping.
+
+> We will rely on maximum likelihood estimation.
+
+### Log-Likelihood
+
+> The softmax function gives us a vector $\hat{\mathbf{y}}$,
+> which we can interpret as the <span style="color: red">**(estimated) conditional probabilities of each class given any input $\mathbf{x}$**</span>, such as 
+ 
+$$\hat{y}_1 = P(y=\textrm{cat} \mid \mathbf{x})$$
+
+
+We can compare the estimates with reality by checking how probable the actual classes are
+according to our model, given the features:
+
+$$
+P(\mathbf{Y} \mid \mathbf{X}) = \prod_{i=1}^n P(\mathbf{y}^{(i)} \mid \mathbf{x}^{(i)}).
+$$
+
+We are allowed to use the factorization
+since we assume that each label is drawn independently
+from its respective distribution $P(\mathbf{y}\mid\mathbf{x}^{(i)})$.
+Since maximizing the product of terms is awkward,
+<span style="color: red">**we take the negative logarithm to obtain the equivalent problem
+of minimizing the negative log-likelihood**</span>:
+
+$$
+-\log P(\mathbf{Y} \mid \mathbf{X}) = \sum_{i=1}^n -\log P(\mathbf{y}^{(i)} \mid \mathbf{x}^{(i)})
+= \sum_{i=1}^n l(\mathbf{y}^{(i)}, \hat{\mathbf{y}}^{(i)}),
+$$
+
+> where for any pair of label $\mathbf{y}$
+> and model prediction $\hat{\mathbf{y}}$
+> over $K$ classes, <span style="color: red">the loss function $l$ is called ***cross-entropy loss***</span>
+
+$$ l(\mathbf{y}, \hat{\mathbf{y}}) = - \sum_{j=1}^K y_j \log \hat{y}_j. $$
+
+Since only one component of the one hot vector $y$ equals 1 it becomes:
+
+$$(\mathbf{y}, \hat{\mathbf{y}}) =- \log \hat{y}_{correct}$$
+
+If, for instance, for the $n-th$ sample we have $P[Y_{n Dog}|X_n]=-log(0.10)=2.30$
+
+> The cross-entropy loss assigns higher lossees to classifications with low probabilities. 
+
+### Softmax and Cross-Entropy Loss
+
+There is a bit advantage in using the $\operatorname*{softmax}(o)$ as estimator/model in a 
+maximum likelihood estimation because the minimization of the logarithm and the exponentiation of the softmax 
+simplyfy a lot the calculation of the minimization of the function via the gradient:
+
+$$
+\begin{aligned}
+l(\mathbf{y}, \hat{\mathbf{y}}) &=  - \sum_{j=1}^q y_j \log \frac{\exp(o_j)}{\sum_{k=1}^q \exp(o_k)} \\
+&= \sum_{j=1}^q y_j \log \sum_{k=1}^q \exp(o_k) - \sum_{j=1}^q y_j o_j \\
+&= \log \sum_{k=1}^q \exp(o_k) - \sum_{j=1}^q y_j o_j.
+\end{aligned}
+$$
+
+To understand a bit better what is going on,
+consider the derivative with respect to any logit $o_j$. We get
+
+$$
+\partial_{o_j} l(\mathbf{y}, \hat{\mathbf{y}}) = \frac{\exp(o_j)}{\sum_{k=1}^q \exp(o_k)} - y_j = \mathrm{softmax}(\mathbf{o})_j - y_j.
+$$
+
+> The derivative is the difference between the probability assigned by our model,
+as expressed by the softmax operation,
+and what actually happened, as expressed
+by elements in the one-hot label vector.
+
+
+
+In this sense, it is very similar to what we saw in regression,
+where the gradient was the difference between the observation $y$ and estimate $\hat{y}$.
+This is not a coincidence. 
+
+For example:
+    $$y=[0,1,0] \:\:\hat y=[0.88,0.10,0.02]$$
+
+then
+    $$\partial_{o_j} l(\mathbf{y}, \hat{\mathbf{y}})=[0.88,−0.90,0.02].$$
+
+https://chatgpt.com/c/6a1b0e1b-93a0-83eb-b718-bdba89fb9166
+
+
+Now consider the case where we observe not just a single outcome
+but an entire distribution over outcomes.
+We can use the same representation as before for the label $\mathbf{y}$.
+The only difference is that rather
+than a vector containing only binary entries,
+say $(0, 0, 1)$, we now have a generic probability vector,
+say $(0.1, 0.2, 0.7)$.
+The math that we used previously to define the loss $l$
+in :eqref:`eq_l_cross_entropy`
+still works well,
+just that the interpretation is slightly more general.
+It is the expected value of the loss for a distribution over labels.
+
+This loss is called the *cross-entropy loss* and it is
+one of the most commonly used losses for classification problems.
+We can demystify the name by introducing just the basics of information theory.
+In a nutshell, it measures the number of bits needed to encode what we see, $\mathbf{y}$,
+relative to what we predict that should happen, $\hat{\mathbf{y}}$.
+We provide a very basic explanation in the following. 
+
+
+
+
+
 
