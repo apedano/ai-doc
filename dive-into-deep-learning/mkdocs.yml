@@ -66,4 +66,7 @@ nav:
   - Linear neural networks for regression:
       - 003-linear_neural_networks_for_regression/linear_regression.md
   - Linear neural networks for classification:
-      - 004-linear_neural_networks_for_classificatin/softmax_regression.md
+      - 004-linear_neural_networks_for_classification/softmax_regression.md
+  - Multilayer perceptors:
+      - 005-multi_layer_perceptrons/multilayer_perceptrons.md
+      - 005-multi_layer_perceptrons/mlp_implementation.md

@@ -83,30 +83,89 @@ x = [0,1,2,3]
 ## Example for neural network training
 
 ```python
-w = torch.tensor(2.0, requires_grad=True)
+import torch
 
-loss = (w - 5)**2
+# Simulating one weight in a network
+W = torch.tensor(2.0, requires_grad=True)
+b = torch.tensor(1.0, requires_grad=True)
 
+# Forward pass: predictions for 3 samples
+x = torch.tensor([1.0, 2.0, 3.0])
+predictions = W * x + b       # [3, 5, 7]
+
+# Loss: mean squared error vs target [3, 5, 8]
+target = torch.tensor([3.0, 5.0, 8.0])
+loss = ((predictions - target) ** 2).mean()  # scalar
+
+# Backward pass: compute gradients
 loss.backward()
 
-print(w.grad)
+print(W.grad)   # d(loss)/dW 
+print(b.grad)   # d(loss)/db
+# Use these gradients to update W and b (gradient descent)
 ```
 
 Loss function:
 
-$$L=(w−5)^2$$
+$$L=avg{(\hat y-y)^2)}$$
 
-Derivative:
 
-$$\frac {\delta L} {\delta w} = 2(w-5)$$
-
-At $w=2$:
-
-```python
-tensor(-6.)
-```
 
 Meaning:
 
 * increasing $w$ decreases the loss
 * gradient descent will move $w$ upward toward 5
+
+
+
+## Detach
+
+```python
+x = torch.arange(-8.0, 8.0, 0.1, requires_grad=True)
+y = torch.relu(x)
+
+d2l.plot(x.detach(), y.detach(), 'x', 'relu(x)', figsize=(5, 2.5))
+```
+
+Here the $x$ and $y$ tensors are passed to the `plot` function with `detach()` which 
+<span style="color:red">**pass only tensor data, not keeping track of the gradient operations**</span>.
+
+In the example above it is needed because often `plot` functions create `numpy` versions of the input 
+
+```python
+x.numpy() 
+```
+if the tensor is not detached, it will result in 
+
+```text
+RuntimeError:
+Can't call numpy() on Tensor that requires grad.
+Use tensor.detach().numpy() instead.
+```
+
+For that reason might be convenient to `detach` internally
+
+```python
+tensor.detach().numpy()
+```
+
+The tensors are detached only for visualization; the original x and y remain connected to the computation graph for gradient calculations.
+
+## `ones_like`
+
+`torch.ones_like(tensor)` Creates a tensor of all 1s with the same shape as the input. 
+Most commonly used as the initial upstream gradient when calling `.backward()` on a non-scalar tensor.
+
+```python
+x = torch.tensor([1.0, 2.0, 3.0], requires_grad=True)
+
+y = x ** 2          # y = [1, 4, 9]
+
+# Can't call y.backward() directly — y is not a scalar!
+# Pass ones_like(y) to say: "treat each output as equally weighted"
+# This is mathematically equivalent to summing the outputs first: y.sum().backward().
+y.backward(torch.ones_like(y))
+
+print(x.grad)       # tensor([2., 4., 6.])  ← dy/dx = 2x at each point
+```
+

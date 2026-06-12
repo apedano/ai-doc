@@ -273,7 +273,7 @@ For positive definite matrices:
 
 Think of a multidimensional bowl.
 
-### Minibatch Stochastic Gradient Descent
+### Batch Gradient Descent
 
 Fortunately, even in cases where we cannot solve the models analytically,
 we can still often train models effectively in practice.
@@ -294,13 +294,14 @@ The most naive application of gradient descent
 consists of taking the derivative of the loss function,
 which is an average of the losses computed
 on every single example in the dataset.
-In practice, this can be extremely slow:
+
+>In practice, this can be extremely slow:
 we must pass over the entire dataset before making a single update,
 even if the update steps might be very powerful :cite:`Liu.Nocedal.1989`.
 Even worse, if there is a lot of redundancy in the training data,
 the benefit of a full update is limited.
 
-#### SGD
+## Stochastic Gradient Descent - SGD
 The other extreme is to consider only a single example at a time and to take
 update steps based on one observation at a time.
 The resulting algorithm, <span style="color:red">**stochastic gradient descent (SGD)**</span>
@@ -314,7 +315,7 @@ Unfortunately, SGD has drawbacks, both computational and statistical.
   * It is up to an order of magnitude more efficient to perform a matrix--vector multiplication than a corresponding number of vector--vector operations.
   * process a single sample at the time (vector) is slower than a full batch (matrix)
 
-####  Minibatch Stochastic Gradient Descent
+##  Minibatch Stochastic Gradient Descent
 
 The solution is to pick an intermediate strategy:
 
@@ -329,146 +330,94 @@ the choice of layers, and the total dataset size.
 preferably a multiple of a large power of $2$, is a good start.
 This leads us to *minibatch stochastic gradient descent*.
 
-At iteration $t$
+### The forward step
 
-* random select samples of the fixed size $s$ $\mathcal{B}_t$
-* $|\mathcal{B}| = s$ fixed size
-* Calculate the gradient of the average loss of the batch based on the current model parameters
-* Multiply the gradient by a predetermined small positive value $\eta$,
-called the *learning rate*, and subtract the resulting term from the current parameter values
+Suppose the full dataset contains 1000 samples.
 
-We can express the update as follows:
+For a batch size of 32:
 
-$$(\mathbf{w},b)_{t+1} \leftarrow (\mathbf{w},b)_{t} - \frac{\eta}{|\mathcal{B_t}|} \sum_{i \in \mathcal{B}_t} \partial_{(\mathbf{w},b)} l^{(i)}(\mathbf{w},b).$$
+$$ B=[(x_1,y_1), ...,(x_{32},y_{32})] $$
 
+Given the <span style="color:red">**linear regression model**</span>
 
+$$\hat{y}=X@W+b$$
 
-#### Explanation
+where 
 
-For a single sample the error is $L = (\hat{y} - y)^2$
+* $n$ input features (2),
 
-for $|\mathcal{B_t}|=s$ minibatch samples, we normalize the sum of errror for each
+* $N$ total samples (1000),
 
-$$
-L=\frac{1}{s}\sum_{i}{(\hat{y_i} - y_i)^2}
-$$
+* $B$ -> $|B|=m$ batch size (32)
 
-which, in matric notation $\sum_{i}{(\hat{y_i} - y_i)^2}$ is $||\hat{Y} - Y||^2$ the <span style="color:red">**the squared L2 norm**</span>
+* $X \in \mathbb{R}^{n,m}$
 
-$$
-L=\frac{1}{s}||\hat{Y} - Y||^2
-$$
+* $W \in \mathbb{R}^{n}$
 
-> the loss is normalized by $\frac{1}{s}$ so it does not scale with the number of samples in the minibatch
+* $b \in \mathbb{R}^{n}$
 
-The update of $w$ and $b$ becomes (given the <span style="color:red">**error**</span> $\epsilon=\hat{Y} - Y$)
+* $\eta$ learning rate 
 
-$$
-w'=w-\eta\frac{\delta{L}}{\delta{w}}=w-\frac{2\eta}{s}(\hat{Y} - Y)\frac{\delta{\hat{Y}}}{\delta{w}}=w-\frac{2\eta\epsilon}{s}\frac{\delta{(wX+b)}}{\delta{w}}=w-\frac{2\eta\epsilon}{s}X
-$$
-
-$$
-b'=b-\eta\frac{\delta{L}}{\delta{b}}=b-\frac{2\eta}{s}(\hat{Y} - Y)\frac{\delta{\hat{Y}}}{\delta{b}}=b-\frac{2\eta\epsilon}{s}\frac{\delta{(wX+b)}}{\delta{b}}=b-\frac{2\eta\epsilon}{s}
-$$
-
-#### Procedure
-
-First we can simulate true features an targets in code
-
-```python
-import numpy as np
-
-# The seed is given an integer value to ensure that the results of pseudo-random generation are reproducible. By re-using a seed value, the same sequence should be reproducible from run to run as long as multiple threads are not running. Reproducibility is a very important concept that ensures that anyone who re-runs the code gets the exact same outputs.
-# 42 is the Answer to the great question of “Life, the universe, and everything”!
-np.random.seed(42)
-n, m = 200, 2 
-
-#generates the design matrix
-X = np.random.uniform(-5, 5, (n, m))        # shape (n, m)
-
-#values for true weights and bias
-true_w = np.array([[3.0], [-2.0]])           # shape (m, 1)
-true_b = 1.5
-
-noise = np.random.normal(0, 1.0, (n, 1)) #normal distribution mean=0 stand_dev=1
-
-y = X @ true_w + true_b + noise             # shape (n, 1)
-```
-This means the true target is
-
-$$y=3x_1-2x_2+1.5 + noise$$
-
-That is what we will try to find
-
-
-In summary, minibatch SGD proceeds as follows:
-
-1. initialize the values of the model parameters, typically at random;
-
-```python
-w = np.random.randn(m, 1)    # shape (2, 1)
-b = 0.0
-eta = 0.01 #learning rate
-epochs = 71 #itarations
-s = 2               # pure Minibatch SGD — s=2 sample at a
-```
-2. iteratively sample random minibatches from the data,
-3. updating the parameters in the direction of the negative gradient.
-   1. For quadratic losses and affine transformations,
-   this has a closed-form expansion:
-```python
-for epoch in range(epochs):
-    indices = np.random.permutation(n)        # ← shuffle once per epoch
-
-    for start in range(0, n, s):
-        idx = indices[start:start + s] #we take a minibatch size of sample indices
-        xi = X[idx]        # shape (s, m)
-        yi = y[idx]        # shape (s, 1)
-
-        y_pred = xi @ w + b
-        error = y_pred - yi
-        
-        dw = 2 * xi.T @ error    # shape (2, 1)
-        db = 2 * np.mean(error) #scalar
-
-        w -= 2*eta/s * dw
-        b -= 2*eta/s * db
-    #track the loss at every epoch
-    y_all_pred = X @ w + b           # shape (n, 1)
-    mse = np.mean((y_all_pred - y) ** 2) #mean squared error -> mean((ŷ - y)²)
-    if epoch % 10 == 0:
-        print(f"Epoch {epoch:3d} | MSE: {mse:.4f} | w: {w.ravel()} | b: {b:.4f}")
-print(f"\nLearned:  w = {w.ravel()}, b = {b:.4f}")
-print(f"True:     w = {true_w.ravel()}, b = {true_b}")
-```
-
-$$\begin{aligned} \mathbf{w} & \leftarrow \mathbf{w} - \frac{\eta}{s} \sum_{i \in \mathcal{B}_t} \partial_{\mathbf{w}} l^{(i)}(\mathbf{w}, b) && = \mathbf{w} - \frac{\eta}{s} \sum_{i \in \mathcal{B}_t} \mathbf{x}^{(i)} \left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right)\\ b &\leftarrow b -  \frac{\eta}{s} \sum_{i \in \mathcal{B}_t} \partial_b l^{(i)}(\mathbf{w}, b) &&  = b - \frac{\eta}{s} \sum_{i \in \mathcal{B}_t} \left(\mathbf{w}^\top \mathbf{x}^{(i)} + b - y^{(i)}\right). \end{aligned}$$
-:eqlabel:`eq_linreg_batch_update`
-
-Since we pick a minibatch $\mathcal{B}$
-we need to normalize by its size $|\mathcal{B}|=s$.
-
-> Frequently, minibatch size $s$ and learning rate $\eta$ are user-defined
+> Frequently, minibatch size $m$ and learning rate $\eta$ are user-defined
 so they are not updated in the training loop. 
 For this reason they are called <span style="color:red">**hyperparameters**</span>.
 
+### The backward step
 
-Output:
+Given the <span style="color:red">**loss function**</span> as the <span style="color:red">**MSE (Mean Squared error)**</span>
 
-```text
-Epoch   0 | MSE: 1.4098 | w: [ 3.17733381 -1.89433841] | b: 1.4795
-Epoch  10 | MSE: 1.0244 | w: [ 3.0443967  -1.95495537] | b: 1.4454
-Epoch  20 | MSE: 1.0250 | w: [ 2.92328966 -2.0389086 ] | b: 1.4178
-Epoch  30 | MSE: 1.1455 | w: [ 3.12536326 -1.97868658] | b: 1.4643
-Epoch  40 | MSE: 0.9824 | w: [ 2.96708134 -1.97749799] | b: 1.4663
-Epoch  50 | MSE: 0.9899 | w: [ 3.03715343 -2.00535642] | b: 1.4708
-Epoch  60 | MSE: 1.9324 | w: [ 2.66398143 -2.00124091] | b: 1.4441
-Epoch  70 | MSE: 1.2686 | w: [ 3.17137694 -2.00112623] | b: 1.4509
+$$$$
+L=\frac{1}{2m}||\hat{Y} - Y||^2=\frac{1}{2m}\sum_{i=1}^m{(\hat{y_i} - y_i)^2}=\frac{1}{2m}\sum_{i=1}^m{e_i^2}
+$$$$
 
-Learned:  w = [ 3.17137694 -2.00112623], b = 1.4509
-True:     w = [ 3. -2.], b = 1.5
-```
+ the loss is normalized by $\frac{1}{s}$ so it does not scale with the number of samples in the minibatch.
+ The 1/2 scalar helps the derivative calculation 
 
+> For the linear regression we need to calculate the derivatives on weigths and bias
+
+$$\frac{\delta{L}}{\delta{W}}=\frac{1}{m}X_m^Te$$
+
+and
+
+$$\frac{\delta{L}}{\delta{b}}=\frac{1}{m}\sum_{i=1}^m{e_i}$$
+
+So we obtain the update of the backward step for the next epoch
+
+$$W^{t+1}=W^{t}-\eta\frac{\delta{L}}{\delta{W^t}}$$
+
+and
+
+$$b^{t+1}=b^{t}-\eta\frac{\delta{L}}{\delta{b}}$$
+
+
+### Adding the L2 regulation weight decay
+
+L2 regularisation adds a penalty term to the loss proportional to the squared magnitude of every weight.
+
+>A network with large weights is one that has learned to be extremely sensitive to specific input patterns — it carves out sharp, narrow decision regions perfectly fitted to the training data but brittle on anything new (<span style="color:red">**overfitting**</span>).
+
+Concretely, a large weight $w$ in a hidden layer means a small change in an input feature causes a large swing in that neuron's activation. The network memorises the training spiral instead of learning its general shape.
+
+We apply the regulation to the loss function
+
+$$L_{total}=L_{MSE}+\frac{\lambda}{2}\|W\|^2=\sum_iw_i^2$$
+
+> $\lambda$ controls the regularization strength. 
+
+> Bias is typically not regularized:
+
+given 
+$$\frac{\delta}{\delta W}\left(\frac{\lambda}{2}\|W\|^2\right)=\lambda W$$
+
+We can adjust the weight backward step with L2 regulation
+
+$$W^{t+1}=W^{t}-\eta\left(\frac{\delta{L}}{\delta{W^t}}+\lambda W^t\right)$$
+
+expanding
+
+$$W^{t+1}=(1-\eta\lambda)W^t-\eta\frac{\delta{L}}{\delta{W^t}}$$
+
+> The factor (1−ηλ) shrinks the weights every step. This is why L2 regularization is often called <span style="color:red">**weight decay**</span>.
 
 > In the end, the quality of the solution is
 typically assessed on a separate <span style="color:red">**validation dataset**</span> (or *validation set*).
@@ -497,6 +446,223 @@ that leads to accurate predictions (and thus low loss).
 >The more formidable task is to find parameters
 that lead to accurate predictions on previously unseen data (outside the training set),
 a challenge called <span style="color:red">**generalization**</span>.
+
+## Mini-Batch SGD Example with MSE Loss and L2 Regularization
+
+This example demonstrates a complete **Mini-Batch Stochastic Gradient Descent (SGD)** update for a linear regression model with:
+
+- 3 input features
+- Mean Squared Error (MSE) loss
+- L2 regularization (weight decay)
+- Mini-batch size = 2
+
+---
+
+### Step 1: Define the Mini-Batch
+
+Mini-batch inputs:
+
+$ X = \begin{bmatrix} 1 & 2 & 3\\ 4 & 5 & 6 \end{bmatrix} $
+
+Targets: $y=\begin{bmatrix}10\\20\end{bmatrix}$
+
+Current model parameters:
+
+$w=\begin{bmatrix}0.5\\-0.2\\0.3\end{bmatrix}$ $b=1.0$
+
+Hyperparameters:
+
+Learning rate: $\eta = 0.01$
+
+L2 regularization coefficient: $\lambda = 0.1$
+
+Mini-batch size: $m=2$
+
+---
+
+### Step 2: Forward Pass
+
+The prediction formula is: $\hat y = Xw+b$
+
+First sample 
+
+$\hat y_1=1(0.5)+2(-0.2)+3(0.3)+1=0.5-0.4+0.9+1=2.0$
+
+Second sample
+
+$\hat y_2=4(0.5)+5(-0.2)+6(0.3)+1=2.0-1.0+1.8+1=3.8$
+
+Predictions:
+
+$\hat y=\begin{bmatrix}2.0\\3.8\end{bmatrix}$
+
+---
+
+### Step 3: Compute Errors
+
+$e=\hat y-y =\begin{bmatrix}2.0\\3.8\end{bmatrix}-\begin{bmatrix}10\\20\end{bmatrix}
+=\begin{bmatrix}-8.0\\-16.2\end{bmatrix}$
+
+---
+
+### Step 4: Compute MSE Loss
+
+The mini-batch MSE is:
+
+$L_{MSE}=\frac{1}{2m}\sum_i e_i^2$
+
+Substituting the values:
+
+$L_{MSE}=\frac{1}{4}\left((-8)^2+(-16.2)^2\right)=\frac{1}{4}(64+262.44)=81.61$
+
+---
+
+### Step 5: Compute L2 Penalty
+
+L2 penalty:
+
+$L_{L2}=\frac{\lambda}{2}\sum_j w_j^2$
+
+First compute:
+
+$||w||^2=0.5^2+(-0.2)^2+0.3^2=0.25+0.04+0.09=0.38$
+
+Then:
+
+$L_{L2}=\frac{0.1}{2}(0.38)=0.019$
+
+---
+
+### Step 6: Total Loss
+
+$L=L_{MSE}+L_{L2}=81.61+0.019=81.629$
+
+---
+
+### Step 7: Compute Gradient of the MSE Term
+
+For linear regression:
+
+$\nabla_w L_{MSE}=\frac{1}{m}X^Te$
+
+Compute $X^T$
+
+$X^T=\begin{bmatrix}1 & 4\\2 & 5\\3 & 6\end{bmatrix}$
+
+Multiply $X^Te$
+
+$X^Te=\begin{bmatrix}1 & 4\\2 & 5\\3 & 6\end{bmatrix}\begin{bmatrix}-8\\-16.2\end{bmatrix}$
+
+Feature 1:
+
+$1(-8)+4(-16.2)=-72.8$
+
+Feature 2:
+
+$2(-8)+5(-16.2)=-97$
+
+Feature 3:
+
+$3(-8)+6(-16.2)=-121.2$
+
+Thus:
+
+$X^Te=\begin{bmatrix}-72.8\\-97\\-121.2\end{bmatrix}$
+
+Divide by the batch size:
+
+$\nabla_wL_{MSE}=\frac{1}{2}\begin{bmatrix}-72.8\\-97\\-121.2\end{bmatrix}=\begin{bmatrix}-36.4\\-48.5\\-60.6\end{bmatrix}$
+
+---
+
+### Step 8: Compute the L2 Gradient
+
+The derivative of the regularization term is:
+
+$\nabla_wL_{L2}=\lambda w$
+
+Substituting:
+
+$=0.1\begin{bmatrix}0.5\\-0.2\\0.3\end{bmatrix}=\begin{bmatrix}0.05\\-0.02\\0.03\end{bmatrix}$
+
+---
+
+### Step 9: Compute Total Weight Gradient
+
+Add both gradients:
+
+$\nabla_wL=\nabla_wL_{MSE}+\nabla_wL_{L2}$
+
+$=\begin{bmatrix}-36.4\\-48.5\\-60.6\end{bmatrix}+\begin{bmatrix}0.05\\-0.02\\0.03\end{bmatrix}=\begin{bmatrix}-36.35\\-48.52\\-60.57\end{bmatrix}$
+
+---
+
+### Step 10: Compute Bias Gradient
+
+The bias is not regularized.
+
+$\nabla_bL=\frac{1}{m}\sum_i e_i=\frac{-8-16.2}{2}=-12.1$
+
+---
+
+### Step 11: SGD Parameter Update
+
+Weight update 
+
+$ w_{new}=w-\eta\nabla_wL=\begin{bmatrix}0.5\\-0.2\\0.3\end{bmatrix}-
+0.01
+\begin{bmatrix}
+-36.35\\
+-48.52\\
+-60.57
+\end{bmatrix}
+$
+
+$=\begin{bmatrix}
+0.8635\\
+0.2852\\
+0.9057
+\end{bmatrix}
+$
+
+### Bias update
+
+$b_{new}=b-\eta\nabla_bL=1-0.01(-12.1)=1.121$
+
+---
+
+## Final Result After One Mini-Batch SGD Step
+
+### Before update
+
+$
+w=
+\begin{bmatrix}
+0.5\\
+-0.2\\
+0.3
+\end{bmatrix}
+$
+
+$
+b=1.0
+$
+
+### After update
+
+$
+w=
+\begin{bmatrix}
+0.8635\\
+0.2852\\
+0.9057
+\end{bmatrix}
+$
+
+$
+b=1.121
+$
+
 
 ## Vectorization for Speed
 
