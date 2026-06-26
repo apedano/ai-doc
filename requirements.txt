@@ -4,3 +4,5 @@ matplotlib~=3.10.9
 pandas~=3.0.2
 torch~=2.11.0
 CairoSVG~=2.9.0
+
+torchvision

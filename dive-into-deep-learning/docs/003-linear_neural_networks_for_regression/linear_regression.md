@@ -400,7 +400,9 @@ Concretely, a large weight $w$ in a hidden layer means a small change in an inpu
 
 We apply the regulation to the loss function
 
-$$L_{total}=L_{MSE}+\frac{\lambda}{2}\|W\|^2=\sum_iw_i^2$$
+$$L_{total}=L_{MSE}+\frac{\lambda}{2}\|W\|^2$$
+
+where $L_{MSE}=\frac{1}{2m}\sum_i e_i^2$ and  $L_{L2}=\frac{\lambda}{2}\sum_j w_j^2$
 
 > $\lambda$ controls the regularization strength. 
 
