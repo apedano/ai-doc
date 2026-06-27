@@ -73,4 +73,7 @@ nav:
   - Convolutional networks for image classification:
       - 007-convolutional_neural_networks/index.md
       - 007-convolutional_neural_networks/implementation.md
+  - Recurring neural networks:
+      - 009-recurring_neural_networks\index.md
+      - 009-recurring_neural_networks\implementation.md
 
