@@ -75,5 +75,7 @@ nav:
       - 007-convolutional_neural_networks/implementation.md
   - Recurring neural networks:
       - 009-recurring_neural_networks\index.md
+      - 009-recurring_neural_networks\vanilla_rnn_training.md
+      - 009-recurring_neural_networks\vanilla_rnn_example.md
       - 009-recurring_neural_networks\implementation.md
 

@@ -256,7 +256,7 @@ $$ l(\mathbf{y}, \hat{\mathbf{y}}) = - \sum_{j=1}^K y_j \log \hat{y}_j. $$
 
 Since only one component of the one hot vector $y$ equals 1 it becomes:
 
-$$(\mathbf{y}, \hat{\mathbf{y}}) =- \log \hat{y}_{correct}$$
+$$l(\mathbf{y}, \hat{\mathbf{y}}) =- \log \hat{y}_{correct}$$
 
 If, for instance, for the $n-th$ sample we have $P[Y_{n Dog}|X_n]=-log(0.10)=2.30$
 
@@ -266,20 +266,68 @@ If, for instance, for the $n-th$ sample we have $P[Y_{n Dog}|X_n]=-log(0.10)=2.3
 
 There is a bit advantage in using the $\operatorname*{softmax}(o)$ as estimator/model in a
 maximum likelihood estimation because the minimization of the logarithm and the exponentiation of the softmax
-simplyfy a lot the calculation of the minimization of the function via the gradient:
+simplyfy a lot the calculation of the minimization of the function via the gradient
 
-$$
-\begin{aligned}
-l(\mathbf{y}, \hat{\mathbf{y}}) &= - \sum_{j=1}^K y_j \log \frac{\exp(o_j)}{\sum_{k=1}^q \exp(o_k)} \\
-&= \sum_{j=1}^K y_j \log \sum_{k=1}^K \exp(o_k) - \sum_{j=1}^K y_j o_j \\
-&= \log \sum_{k=1}^K \exp(o_k) - \sum_{j=1}^K y_j o_j.
-\end{aligned}
-$$
 
 ### Derivative
 
-To understand a bit better what is going on,
-consider the derivative with respect to any logit $o_j$. We get
+https://medium.com/data-science/derivative-of-the-softmax-function-and-the-categorical-cross-entropy-loss-ffceefc081d1
+
+
+We want to calculate the derivative with respect to any logit $o_j$, meaning $\frac{\partial l}{\partial o_i}$
+
+> This means that we need to calculate the <span style="color:red">**Jacobian**</span> of the softmax function, which is the matrix of all first-order partial derivatives:
+
+$$J_{softmax}=\begin{pmatrix}   \frac{\partial l_1}{\partial o_1} & \frac{\partial l_1}{\partial o_2} & \dots & \frac{\partial l_1}{\partial o_k}
+    \\   \frac{\partial l_2}{\partial o_1} & \frac{\partial l_2}{\partial o_2} & \dots & \frac{\partial l_2}{\partial o_k} \\   
+    \dots & \dots & \dots & \dots \\
+    \frac{\partial l_k}{\partial o_1} & \frac{\partial l_k}{\partial o_2} & \dots & \frac{\partial l_k}{\partial o_k}
+\end{pmatrix}$$
+ 
+where 
+
+$$ l_i=\frac{e^{o_i}}{\sum_{l=1}^Ke^{o_l}} \:\: \forall i=1,\dots,K$$
+
+> Each output of the softmax function depends on all the input values (due to the denominator). For this reason the off-diagonal elements of the Jacobian aren’t zero.
+
+Since the outputs of the softmax function are strictly positive values, we can calculate the derivative of the $\log$ instead of taking the partial derivative of the output (also called <span style="color:red">**“logarithmic derivative”**</span>):
+
+
+$\frac{\partial \log(l_i)}{\partial o_j}=\frac{1}{l_i}\frac{\partial l_i}{\partial o_j}$ that means that 
+
+$$\frac{\partial l_i}{\partial o_j} = l_1\frac{\partial \log(l_i)}{\partial o_j} \:\: (\circ)$$
+
+We can easily calculate the  log
+
+$$\log(l_i)=\log \left(\frac{e^{o_i}}{\sum_{l=1}^Ke^{o_l}}\right)=o_i-\log\left(\sum_{l=1}^Ke^{o_l}\right)$$
+
+If we look at the derivative now
+
+$$\frac{\partial \log(l_i)}{\partial o_j}=\frac{\partial o_i}{\partial o_j}-\frac{\partial}{\partial o_j}\log\left(\sum_{l=1}^Ke^{o_l}\right) \:\: (\bullet)$$
+
+We can express 
+
+$$\frac{\partial o_i}{\partial o_j}=\delta_{ij}
+\left\{
+\begin{array}{rcl}
+1, & i=j \\
+0, & i\not = j 
+\end{array}
+\right.$$
+
+we can express $(\bullet)$ this with
+
+$$\frac{\partial \log(l_i)}{\partial o_j}=\delta_{ij}-\frac{1}{\sum_{l=1}^Ke^{o_l}} \left(\frac{\partial}{\partial o_j}\sum_{l=1}^Ke^{o_l}\right)$$
+
+
+
+
+
+ 
+
+
+
+
 
 $$
 \partial_{o_j} l(\mathbf{y}, \hat{\mathbf{y}}) = \frac{\exp(o_j)}{\sum_{k=1}^K \exp(o_k)} - y_j = \mathrm{softmax}(\mathbf{o})_j - y_j.

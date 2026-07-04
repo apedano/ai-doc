@@ -28,3 +28,25 @@ $$
 n & 2n & \cdots & n^2 \\
 \end{bmatrix}
 $$
+
+## Sample of function domain
+
+```text
+f\colon
+\left\{
+\begin{array}{rcl}
+\mathbf{N} & \longrightarrow & \mathbf{N} \\
+x & \longmapsto & x^2
+\end{array}
+\right.
+```
+
+$$
+f\colon
+\left\{
+\begin{array}{rcl}
+\mathbf{N} & \longrightarrow & \mathbf{N} \\
+x & \longmapsto & x^2
+\end{array}
+\right.
+$$
