@@ -269,7 +269,7 @@ maximum likelihood estimation because the minimization of the logarithm and the 
 simplyfy a lot the calculation of the minimization of the function via the gradient
 
 
-### Derivative
+### Derivative of the softmax function
 
 https://medium.com/data-science/derivative-of-the-softmax-function-and-the-categorical-cross-entropy-loss-ffceefc081d1
 
@@ -293,9 +293,11 @@ $$ l_i=\frac{e^{o_i}}{\sum_{l=1}^Ke^{o_l}} \:\: \forall i=1,\dots,K$$
 Since the outputs of the softmax function are strictly positive values, we can calculate the derivative of the $\log$ instead of taking the partial derivative of the output (also called <span style="color:red">**“logarithmic derivative”**</span>):
 
 
-$\frac{\partial \log(l_i)}{\partial o_j}=\frac{1}{l_i}\frac{\partial l_i}{\partial o_j}$ that means that 
+$$\frac{\partial \log(l_i)}{\partial o_j}=\frac{1}{l_i}\frac{\partial l_i}{\partial o_j} \:\: (\boxplus)$$ 
 
-$$\frac{\partial l_i}{\partial o_j} = l_1\frac{\partial \log(l_i)}{\partial o_j} \:\: (\circ)$$
+that means that 
+
+$$\frac{\partial l_i}{\partial o_j} = l_i\frac{\partial \log(l_i)}{\partial o_j} \:\: (\circ)$$
 
 We can easily calculate the  log
 
@@ -317,21 +319,54 @@ $$\frac{\partial o_i}{\partial o_j}=\delta_{ij}
 
 we can express $(\bullet)$ this with
 
-$$\frac{\partial \log(l_i)}{\partial o_j}=\delta_{ij}-\frac{1}{\sum_{l=1}^Ke^{o_l}} \left(\frac{\partial}{\partial o_j}\sum_{l=1}^Ke^{o_l}\right)$$
+$$\frac{\partial \log(l_i)}{\partial o_j}=\delta_{ij}-\frac{1}{\sum_{l=1}^Ke^{o_l}} \left(\frac{\partial}{\partial o_j}\sum_{l=1}^Ke^{o_l}\right) \:\:( \diamond)$$
 
+The partial derivative of the sum can be calculated as
 
+$$\frac{\partial}{\partial o_j}\sum_{l=1}^Ke^{o_l}=\frac{\partial e^{o_1}}{\partial o_j}+\dots+\frac{\partial e^{o_j}}{\partial o_j}+\dots+\frac{\partial e^{o_K}}{\partial o_j}=\frac{\partial e^{o_j}}{\partial o_j}=e^{o_j}$$
 
+in $(\diamond)$ it makes
 
+$$\frac{\partial \log(l_i)}{\partial o_j}=\delta_{ij}-\frac{e^{o_j}}{\sum_{l=1}^Ke^{o_l}} = \delta_{ij} - l_j\:\:( \diamond\diamond)$$
 
- 
+if we replace $( \diamond\diamond)$ in $(\circ)$ we need to multiply $l_i$
 
+> $$\frac{\partial l_i}{\partial o_j}=l_i\frac{\partial \log(l_i)}{\partial o_j}=l_i\left(\delta_{ij} - l_j\right)$$
 
+This formula can used to calculate the Jacobian of the softmax respect on the logit
 
+$$J_{softmax}=\begin{pmatrix}   l_1(1-l_1) & -l_1l_2 & \dots & -l_1l_k
+    \\   -l_2l_1 & l_2(1-l_2) & \dots & -l_2l_k \\   
+    \dots & \dots & \dots & \dots \\
+    -l_kl_1 & -l_k l_2 & \dots & l_k(1-l_k)
+\end{pmatrix}$$
 
+### Derivative of the loss function
 
-$$
-\partial_{o_j} l(\mathbf{y}, \hat{\mathbf{y}}) = \frac{\exp(o_j)}{\sum_{k=1}^K \exp(o_k)} - y_j = \mathrm{softmax}(\mathbf{o})_j - y_j.
-$$
+Given the cross entropy loss function
+
+$$ l(\mathbf{y}, \hat{\mathbf{y}}) = L = - \sum_{i=1}^K y_i \log \hat{y}_i = - \sum_{i=1}^K y_i \log l_i $$
+
+We calculate the derivative respect on the logit
+
+$$\frac{\partial L}{\partial o_j}=- \sum_{i=1}^K y_i\frac{\partial \log(l_i)}{\partial o_j}$$
+
+using $(\boxplus)$ the derivative becomes 
+
+$$\frac{\partial L}{\partial o_j}=- \sum_{i=1}^K \frac{y_i}{l_i}\frac{\partial l_i}{\partial o_j}=- \sum_{i=1}^K \frac{y_i}{l_i}l_i\left(\delta_{ij} - l_j\right)=- \sum_{i=1}^K y_i\left(\delta_{ij} - l_j\right)$$
+
+if we calculate the product we have
+
+$$\frac{\partial L}{\partial o_j}= \sum_{i=1}^K y_il_j-\sum_{i=1}^Ky_i\delta_{ij}=\sum_{i=1}^K y_il_j-y_j=\sum_{i=1}^K y_il_j-y_j=$$
+
+$$=l_j \sum_{i=1}^K y_i-y_j$$ 
+
+remember that $\sum_{i=1}^K y_i=1$ (one hot vector of the true class)
+
+We obtain the formula of the <span style="color:red">**derivative of the loss**</span>
+
+> $$\frac{\partial L}{\partial o}=\hat y - y$$ 
+
 
 > The derivative is the difference between the probability assigned by our model,
 > as expressed by the softmax operation,

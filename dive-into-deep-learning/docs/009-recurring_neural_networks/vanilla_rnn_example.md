@@ -64,5 +64,20 @@ $$L = -y log(\hat y)=-log(0.6359)=0.452$$
 
 For binary cross-entropy with sigmoid
 
-$$\frac{\partial L}{\partial z}=\hat - y =0.6359-1=-0.3641$$
+from the [Backward step in RNN](../009-recurring_neural_networks/#backward-step)
+
+$$\frac{\partial L}{\partial z}=\hat y - y =0.6359-1=-0.3641$$
+
+so, at the time step $t=3$
+
+$$\frac{\partial L}{\partial W_{hy}}=\frac{\partial L}{\partial z}h_3^T=-0.3641\times 0.4647=-0.1692$$
+
+### BTT 
+
+
+
+
+
+
+
 
