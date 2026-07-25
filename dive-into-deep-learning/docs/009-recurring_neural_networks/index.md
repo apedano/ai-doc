@@ -248,6 +248,8 @@ Furthermore, using $(\wr)$ for the $\tanh$ derivative we have
 
 ##### Error signal from the hidden state
 
+Documentation: [site](https://deeplearningnotes.com/rnns-attention/rnns-basics/bptt#parameter-gradients-as-outer-product-sums) 
+
 The hidden state influences the loss with two contribution
 
 * _Local contribution_ $(\delta^{h}_{t})_{local}$: depends on how hidden state influences the pre activation output $h_t \rightarrow z_t$
@@ -266,127 +268,52 @@ $$(\delta^{h}_{t})_{rec}=\frac{\partial a_{t+1}}{\partial h_{t}}^\mathsf{T}\frac
 
 Extracting $\delta^{a}_{t+1}=(1-h^2_{t+1})\odot\delta^{h}_{t+1}$
 
->$$\delta^{h}_{t}=(\delta^{h}_{t})_{local}+(\delta^{h}_{t})_{rec}=W_{hy}^\mathsf{T}\delta^{z}_{t}+W_{hh}^\mathsf{T}(1-h^2_{t+1})\odot\delta^{h}_{t+1}$$
+>$$\delta^{h}_{t}=(\delta^{h}_{t})_{local}+(\delta^{h}_{t})_{rec}=W_{hy}^\mathsf{T}\delta^{z}_{t}+W_{hh}^\mathsf{T}\delta^a_{t+1}$$
 
 ### Backpropagation BTT (Backpropagation Through Time)
 
 > To calculate the error signal of the hidden state we need to start from the last time step output, going back in time
 
-We start with  $$\delta^{h}_{T+1}:=0 \rightarrow \delta^{h}_{T}=W_{hy}^\mathsf{T}\delta^{z}_{T}$$
+We start with $t=T$  
+
+> $$\delta^{h}_{T+1}:=0 \rightarrow \delta^{h}_{T}=W_{hy}^\mathsf{T}\delta^{z}_{T} \rightarrow \delta^{a}_{T}=(1-h^2_T)\odot\delta^{h}_{T}$$
 
 So we can go back in time as 
 
-$$\delta^{h}_{T-1}=W_{hy}^\mathsf{T}\delta^{z}_{T-1}+W_{hh}^\mathsf{T}(1-h^2_{T})\odot\delta^{h}_{T}$$
+> $$\delta^{h}_{T-1}=W_{hy}^\mathsf{T}\delta^{z}_{T-1}+W_{hh}^\mathsf{T}\delta^{a}_{T}$$
+
+and
+
+> $$\delta^{a}_{T-1}=(1-h^2_{T-1})\odot\delta^{h}_{T-1}$$
+
+> $$ \delta^{z}_{T-1}=\hat y_{T-1}-y_{T-1} $$
 
 and so on.
 
 Note that we can store the hidden state arrays $h_t$ from the forward step calculations
 
-
-<span style="color:red">**FROM HERE IT IS THE OLD IMPLEMENTATION**</span>
-https://deeplearningnotes.com/rnns-attention/rnns-basics/bptt#parameter-gradients-as-outer-product-sums
-
-The error signals from 
-
-
-For the output layer we can easily calculate the derivatives with the chain rule at the given time step t
-
-$$\frac{\partial L}{\partial W_{hy}}=\frac{\partial L_t}{\partial z_{t}}\frac{\partial z_t}{\partial W_{hy}}$$
+Let's see that in action:
 
 
 
-and deriving $(\circ)$ we get
+### Parameter Gradients as Outer-Product Sums
 
-> $$\frac{\partial L}{\partial W_{hy}}=\sum_{t=1}^{T}\delta_{z_t}h_t^T \:\:,\frac{\partial L}{\partial b_{y}}=\sum_{t=1}^{T}\delta_{z_t} \:\: (\lhd)$$
+>Since we use linear expressions in the chain rules of the parameter gradient of the loss, we can represent the gradient 
+as the <span style="color:red">**outer product of the derivative of the loss multiplied the transposed vector which is the factor of the parameter**</span>
 
-In the example we process t=3→2→1
+So we start with 
 
-$$\delta_{y_3}=\delta_{z_3}h_3^T=$$
+> $$\frac{\partial L}{\partial W_{hh}}=\sum_{t=1}^{T}\frac{\partial L}{\partial a_t}\frac{\partial a_t}{\partial W_{hh}}=\sum_{t=1}^{T}\delta^a_th_{t-1}^\mathsf{T}$$
 
-$$\frac{\partial L}{\partial W_{hy}}=$$
+Using the same principle we can calculate the other parameter's gradients
 
+> $$\frac{\partial L}{\partial W_{hx}}=\sum_{t=1}^{T}\frac{\partial L}{\partial a_t}\frac{\partial a_t}{\partial W_{hx}}=\sum_{t=1}^{T}\delta^a_tx_{t}^\mathsf{T}$$
 
+> $$\frac{\partial L}{\partial b_{h}}=\sum_{t=1}^{T}\frac{\partial L}{\partial a_t}\frac{\partial a_t}{\partial b_{h}}=\sum_{t=1}^{T}\delta^a_t$$
 
-### Backpropagation BTT (Backpropagation Through Time)
+> $$\frac{\partial L}{\partial W_{hy}}=\sum_{t=1}^{T}\frac{\partial L}{\partial z_t}\frac{\partial z_t}{\partial W_{hy}}=\sum_{t=1}^{T}\delta^z_th_{t}^\mathsf{T}$$
 
-We update the weights $W_{hh}$ by getting the derivative of the loss at the very last time step $L_T$ with respect
-to $W_{hh}$
-
-> The matrix update is unique for all time steps $W_{hh}$ does not depend on the time $t$.
-
-> See in the backpropagation, how the output at the very last timestep affects the weights backward to the previous
-> steps
-
-
-![backpropagation.png](img/backpropagation.png)
-
-The loss function cumulates the time step contributions
-
-$$\frac{\partial L}{\partial W_{hh}}=\sum_{t=1}^{T}\frac{\partial L_t}{\partial W_{hh}}$$
-
-using the chain rule
-
-$$=\sum_{t=1}^{T}\frac{\partial L_t}{\partial a_t}\frac{\partial a_t}{\partial W_{hh}} \:\:(\sqcap)$$
-
-We call <span style="color:red">**ERROR SIGNAL**</span> or <span style="color:red">**GRADIENT at t**</span>
-
-$$\delta_t=\frac{\partial L_t}{\partial a_t}$$
-
-Then, we can calculate the derivative of $(\circledast)$
-
-$$\frac{\partial a_t}{\partial  W_{hh}}=h^T_{t-1}$$
-
-So $(\sqcap)$ becomes
-
-$$\frac{\partial L}{\partial W_{hh}}=\sum_{t=1}^{T}\delta_th^T_{t-1} \:\:(\circledcirc)$$
-
-#### Calculation at the output time step $T$
-
-Calculate the error signal at the output with the chain rule
-
-$$\delta_T=\frac{\partial L}{\partial a_T}=\frac{\partial L}{\partial h_T}\frac{\partial h_T}{\partial a_T}=$$
-
-we can apply the chain rule again
-
-$$=\frac{\partial L}{\partial z_T}\frac{\partial z_T}{\partial h_T}\frac{\partial h_T}{\partial a_T}=$$
-
-Using $(\cup)$, $(\circ)$ and $(\wr)$ it is
-
-$$\delta_T=(\hat y-y)W_{hy}\odot (1-h^2_t)$$
-
-#### Calculate the previous time step loss
-
-This is not directly calculated, we can do it for the time step before $T$ and proceed backword in time.
-
-That is what BTT does.
-
-First we need to express the error signal at $t$ depending on the one from the future time step $t+1$
-
-$$\delta_{t+1}=\frac{\partial L}{\partial a_{t+1}}=\frac{\partial L}{\partial h_{t}}\frac{\partial h_t}{\partial a_{t+1}} \:\: (\curlywedge)$$
-
-and
-
-$$a_{t+1}=W_{hh}h_t+W_{hx}x_{t+1}\:\Rightarrow\:h_t=\frac{a_{t+1}}{W_{hh}}-W_{hx}x_{t+1} $$
-
-so
-
-$$\frac{\partial h_t}{\partial a_{t+1}}=\frac{1}{{W_{hh}}}\:\: (\backsim)$$
-
-so we can express from $(\curlywedge)$ and $(\backsim)$
-
-$$\frac{\partial L}{\partial h_{t}}=W_{hh}^\mathsf{T}\delta_{t+1} \:\: (\ddagger) $$
-
-Using $(\ddagger)$ we can express $\delta_t$ using the chain rule for $h_t$ depending on $\delta_{t+1}$
-
-> $$\delta_t=\frac{\partial L}{\partial a_{t}}=\frac{\partial L}{\partial h_{t}}\frac{\partial h_t}{\partial a_{t}}=W_{hh}^\mathsf{T}\delta_{t+1}\odot(1-h_t^2)$$
-
-We can iterate for all time stamps in $(\circledcirc)$ obtainig
-
-> $$\delta_T=(\hat y-y)W_{hy}^\mathsf{T}\odot(1-h^2_T)$$
-
-> $$\frac{\partial L}{\partial W_{hh}}=\delta_Th_{T-1}^\mathsf{T}+\dots+\delta_kh_{k-1}^\mathsf{T}+\dots+\delta_1h_{0}^\mathsf{T}=\sum_{t=1}^\mathsf{T}W_{hh}^\mathsf{T}[\delta_{t+1}\odot(1-h_t^2)]h^\mathsf{T}_{t-1} \:\:(\rhd)$$
-
-> $$\frac{\partial L}{\partial W_{hx}}=\sum_{t=1}\delta_Tx_{T}^\mathsf{T}+\dots+\delta_kx_{k}^\mathsf{T}+\dots+\delta_1x_{1}^\mathsf{T}$$
+> $$\frac{\partial L}{\partial b_{y}}=\sum_{t=1}^{T}\frac{\partial L}{\partial z_t}\frac{\partial z_t}{\partial b_{y}}=\sum_{t=1}^{T}\delta^z_t$$
 
 ### Update stepSGD
 
@@ -399,6 +326,8 @@ Using $(\lhd)$
 And the hidden state matrix update from $(\rhd)$
 
 > $W_{hh}^{new}=W_{hh}^{old}-\eta\frac{\partial L}{\partial W_{hh}}$
+
+<span style="color:red">**USE CLAUDE: VANILLA with decay numeric example**</span>
 
 #### Issue with the sequence length
 

@@ -1,5 +1,7 @@
 # Key concepts
 
+STANFORD course: https://www.youtube.com/playlist?list=PLoROMvodv4rOmsNzYBMe0gJY2XS8AQg16
+
 To build traditional applications, we might **enumerate all the common events that our program should handle**. 
 
 For example, whenever a customer clicks to add an item to their shopping cart, our program should add an entry to the shopping cart database table, associating that user’s ID with the requested product’s ID. 
