@@ -61,8 +61,46 @@ which might be not enough for very long sequences (a paragraph, a book) or overi
 
 > The **solution** is to look back at the entire input sequence at every time step to generate the output
 
+## Attention in RNN based sequence-to-sequence
 
-<span style="color: red">**T:8:29**</span>
+Compared to the previous setup, we still have an encoder RNN and the second decoder RNN with the 
+hidden state $s_t$
+
+> This time the decoder hidden state at time stamp $t$ will be the scalar result of the linear activation  
+> of a combination of the encoder hidden state and the previous decoder hidden state called <span style="color: red">**alignment scores**</span>
+
+$$e_{t,i}=f_{att}\left(s_{t-1},h_i\right) \:(scalar)$$
+
+where
+
+* $t$ is the decoder time step
+* $i$ is the encoder time step
+
+  
+
+Among all possible ways to have $f_{att}$ combine the vectors a linear transformation is ofter used 
+
+The alignent scores are arbitrary scalar, so we need to bound their values using the $softmax$ function in order
+to obtain a probability distribution from them called <span style="color: red">**attention weight**</span>.
+
+$$a_{t,i}=softmax(e_{t,i})$$
+
+$0 \lt a_{t,i} \lt 1$ and $\sum_{i}a_{t,i}=1$ for each time step
+
+> the attention score is best understood as **how much attention the decoder should pay to the i-th input word 
+> when generating the t-th output word**.
+
+
+We can now compute a new <span style="color: red">**context vector**</span> as the weighted some of all attention weights over the corresponding encoder 
+hidden state
+
+$$c_{t}=\sum_ia_{t,i}h_i$$
+
+
+
+<span style="color: red">**T:12:22**</span> 
+
+
 
 
 
