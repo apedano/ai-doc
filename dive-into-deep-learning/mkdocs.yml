@@ -76,4 +76,7 @@ nav:
   - Recurring neural networks:
       - 009-recurring_neural_networks/index.md
       - 009-recurring_neural_networks/vanilla_rnn_example.md
+  - Transformers and attention mechanisms:
+      - 011-transformers_and_attention_mechanisms/index.md
+      - 011-transformers_and_attention_mechanisms/attention_layer_example.md
 
