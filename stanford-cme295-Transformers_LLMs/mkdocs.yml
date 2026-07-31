@@ -1,0 +1,64 @@
+site_name: Stanford CME295 Transformers & LLMs | Autumn 2025
+site_description: from the playlist https://youtube.com/playlist?list=PLoROMvodv4rOCXd21gf0CF4xr35yINeOy&si=ZqpJ1ay1n2Y_Qs1d
+site_author: Alessandro
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.snippets
+  - pymdownx.arithmatex: #MathJax support is built-in.
+      generic: true
+  - pymdownx.tabbed
+  - toc:
+      permalink: true
+#MathJax lib
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+  - https://unpkg.com/mermaid@11/dist/mermaid.min.js
+  - javascripts/mermaid.js
+
+plugins:
+  - search
+nav:
+  - index.md
+  - NLP overview:
+      - 1-NLP overview/index.md
+
+
