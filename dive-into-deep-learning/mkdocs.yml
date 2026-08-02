@@ -79,4 +79,5 @@ nav:
   - Transformers and attention mechanisms:
       - 011-transformers_and_attention_mechanisms/index.md
       - 011-transformers_and_attention_mechanisms/attention_layer_example.md
+      - 011-transformers_and_attention_mechanisms/transformer_example.md
 

@@ -410,7 +410,7 @@ $$\sigma_i=\frac{1}{D}\sum_{k=1}^{D}\left(z_{ik}-\mu_i\right)^2$$
 
 $$\hat z_{ik}=\frac{z_{ik}-\mu_i}{\sqrt{\mu_i^2+\epsilon}}$$
 
-4) **learnable affine transform (scale $\gamma \in \mathbb{R}^D $, shift $\beta \in \mathbb{R}^D $, both learned
+4) **learnable affine transform (scale $\gamma \in \mathbb{R}^D$, shift $\beta \in \mathbb{R}^D$, both learned
    parameters, applied elementwise**
 
 $$y_{i,k}=\gamma_k\hat z_{ik}+\beta_k$$
