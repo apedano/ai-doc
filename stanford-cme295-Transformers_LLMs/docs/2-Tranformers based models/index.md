@@ -326,7 +326,7 @@ then we have
 >$$V\cdot R_{m,\theta}=\begin{pmatrix}   r\cdot cos(\varphi-m\theta) &&   r\cdot sin(\varphi-m\theta)   \end{pmatrix}$$
 
 
-## RoPE = Rotary Position Embedding
+### Intuition: benefit
 
 The idea is to apply a rotation (applying the matrix above) to the query and key vectors. 
 
@@ -335,6 +335,27 @@ The advantage is that it is still a matrix operation that is computationally eff
 ![rope.png](img/rope.png)
 
 > we want to represent similarity in terms of rotations, so <span style="color:red">**$rotation \propto similarity $**</span> .
+
+If we recall the self attention layer formula:
+
+$\text{Attention}(Q,K,V)=\text{softmax}(\frac{QK^\mathsf{T}}{\sqrt{d_k}})V$
+
+and we focus on the score part, dependent on the input query and key vectors:
+
+$Q_mK_n^\mathsf{T}=$ and, as in the picture above we rotate the two vectors by $m\theta$ and
+$n\theta$ respectively, we have
+
+$Q'_m=Q_mR(m\theta)$ and $K'_n=K_nR(n\theta)$ and we recalculate the score
+
+$$Q'_mK^{'{\mathsf{T}}}_n=Q_mR(m\theta)(K_nR(n\theta))^{\mathsf{T}}=Q_mR(m\theta)R(n\theta)^{\mathsf{T}}K_n^{\mathsf{T}}$$
+
+Since we know that $R(\alpha)R(\beta)=R(\alpha+\beta)$ and $R(\alpha)^{\mathsf{T}}=R(-\alpha)$
+
+we have [from gemini last question]
+
+
+
+
 
 ### RoPE multi-dimension
 
