@@ -180,7 +180,7 @@ Narrower vectors are considered more similar (embedded)
 
 ![embedding.png](img/embedding.png)
 
-## Word representation: `Word2Vec` for 
+## Word representation: `Word2Vec` for
 
 From the article https://arxiv.org/pdf/1301.3781
 
@@ -258,7 +258,7 @@ We create the **(center, context) pairs** set for each word, indicating the 1 di
 | `the`       | `on`,`mat`              |
 | `mat`       | `the`                   |
 
-From that we create training set of input, target pairs $(x,y)$. 
+From that we create training set of input, target pairs $(x,y)$.
 
 (skip-gram splits each context word into its own pair)
 
@@ -272,11 +272,12 @@ From that we create training set of input, target pairs $(x,y)$.
 ...
 ```
 
-Example $(x,y)=$(`sat`,`on`), $x_{sat}=\begin{bmatrix}0 & 0 & 1 & 0 & 0\end{bmatrix}$, $y_{on}=\begin{bmatrix}0 & 0 & 0 & 1 & 0\end{bmatrix}$   
+Example $(x,y)=$(`sat`,
+`on`), $x_{sat}=\begin{bmatrix}0 & 0 & 1 & 0 & 0\end{bmatrix}$, $y_{on}=\begin{bmatrix}0 & 0 & 0 & 1 & 0\end{bmatrix}$
 
 We design the network to have a hidden state dimension $D_h=3$
 
-Therefore  $W_{xh} \in \mathbb{R}^{5,3}$ 
+Therefore  $W_{xh} \in \mathbb{R}^{5,3}$
 
 Example:
 
@@ -287,19 +288,25 @@ W_xh = [[0.2, 0.1, 0.4],   # the
        [0.7, 0.6, 0.1],   # on
        [0.3, 0.2, 0.5]]   # mat
 ```
-so $h=\begin{bmatrix}0.1 & 0.3 & 0.8 \end{bmatrix}$ (this is <span style="color:red"><u>**the current embedding for $x_{sat}$**</u></span>)
+
+so $h=\begin{bmatrix}0.1 & 0.3 & 0.8 \end{bmatrix}$ (this is <span style="color:red"><u>**the current embedding
+for $x_{sat}$**</u></span>)
 
 * Hidden layer → output layer via a second matrix  $W_{xh} \in \mathbb{R}^{3,5}$, then $\hat y=sofmax(hW_{hy})$.
 
-* Compare predicted probabilities to the true target y = [0,0,0,1,0] (i.e., "on" should get probability 1) using cross-entropy loss.
+* Compare predicted probabilities to the true target y = [0,0,0,1,0] (i.e., "on" should get probability 1) using
+  cross-entropy loss.
 
-* Backpropagate the error to update both $W_{xh}$ and $W_{hy}$ — this moves the `sat` row of $W_{xh}$ slightly toward directions that make `on` more likely to be predicted, and slightly away from directions for words that don't co-occur with `sat`.
+* Backpropagate the error to update both $W_{xh}$ and $W_{hy}$ — this moves the `sat` row of $W_{xh}$ slightly toward
+  directions that make `on` more likely to be predicted, and slightly away from directions for words that don't co-occur
+  with `sat`.
 
-* At the end of the training the matrix $W_{xh}$ settles into vectors that capture meaningful relationships between words — that's the "<span style="color:red">**embedding matrix**</span>" you extract and use afterward
+* At the end of the training the matrix $W_{xh}$ settles into vectors that capture meaningful relationships between
+  words — that's the "<span style="color:red">**embedding matrix**</span>" you extract and use afterward
 
 ### Tokens embedding
 
-The embedding of a token $t$ can be extracted from the embedding matrix $W$ (former $W_{xh}$) at the index corresponding 
+The embedding of a token $t$ can be extracted from the embedding matrix $W$ (former $W_{xh}$) at the index corresponding
 to the token
 
 If the element 1 of the OHV of $t$ is $i$ the embedding will be the $i-th$ row of $W$
@@ -315,7 +322,8 @@ $E(\text{on})=W[3,:]=\begin{bmatrix}0.7 & 0.6 & 0.1\end{bmatrix}$
 #### Embedding 1: Cosin similarity (most commonly used - How similar are w1, w2?)
 
 > <span style="color:red">**Cosin similarity**</span> between to vectors $t_1$ and $t_2$ is
-> $$\text{sim}(t_1,t_2)=\frac{t_1t_2}{\Vert t_1\Vert\Vert t_2\Vert} \in [-1,1]$$ 
+> 
+> $$\text{sim}(t_1,t_2)=\frac{t_1t_2}{\Vert t_1\Vert\Vert t_2\Vert} \in [-1,1]$$
 
 Example:
 
@@ -327,23 +335,101 @@ dot product = (0.1)(0.7) + (0.3)(0.6) + (0.8)(0.1) = 0.07 + 0.18 + 0.08 = 0.33
 sim(sat, on) = 0.33 / (0.860 × 0.927) ≈ 0.33 / 0.797 ≈ 0.414
 ```
 
-A value near 1 means the tokens point in nearly the same direction in embedding space (very related/interchangeable in context); 
+A value near 1 means the tokens point in nearly the same direction in embedding space (very related/interchangeable in
+context);
 near 0 means unrelated; negative means opposite. Here, 0.414 is mild positive similarity.
-
 
 #### Embedding 2:Relationship (used for analogies - What's the relationship/direction)
 
-> The relationship between two words (e.g., the "royalty" direction between king/queen) 
+> The relationship between two words (e.g., the "royalty" direction between king/queen)
 > $$\text{relation}(t_1,t_2)=E(t_1)-E(t_2)$$
 
 The famous emergent property
- 
+
 ```text
 E("king") - E("man") + E("woman") ≈ E("queen")
 ```
-## Word representation with RNN (LSTM)
+
+## Word representation with RNN (LSTM) - Query, Key and Value
+
+|                                    | Description                                                                                                                                                                          | Analogy with investigation                                                                                                       |
+|------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------|
+| $Q$ What are you looking for?      | The Query vector represents what a specific word (or token) is "looking for" in other words within the sequence.                                                                     | Each detective has a specific question they want answered, like “Who was at the scene of the crime?”                             |
+| $K$ How do I identify information? | The Key vector encodes information about a word in a way that makes it "searchable." Think of it as metadata for each token, indicating what kind of information this word provides. | The evidence they have is labeled with tags like “time of arrival” or “fingerprints.” These labels make the evidence searchable. |
+| $V$ What information do I provide? | The Value vector represents the actual content or information that the word contributes to the overall representation.                                                               | Each piece of evidence also contains the actual content: the fingerprint report, timestamps, or alibi details.                   |
+
+
+
+### Calculation
+
+Given the <span style="color:red">**embedding matrix**</span> $E \in \mathbb{R}^{N,D}$
+
+* $N$ number of tokens in the input sequence
+* $D$ the number of featured for each token
+
+$Q=E\cdot W_Q$ $K=E\cdot W_K$ $V=E\cdot W_V$
+
+The weight matrices are <span style="color:red">**learned**</span> and they represent a transformation of the embedding. 
+
+This transformation essentially **adjusts the importance or emphasis assigned to each dimension of the token's representation** for the specific role (Query, Key, or Value). 
 
 Self-Attention can also be used
+
+### Q: weighted questions
+
+> These weights essentially tell the model, "For this token, these specific features are most relevant when determining its relationship with other tokens."
+
+> The weight matrix learns to transform the token embeddings into a space where they encode "questions" about the input.
+
+So essentially the query matrix $Q$ represents all the questions that are being asked about the input sequence. These questions aim to determine:
+
+* Which tokens are important for understanding the sequence.
+
+* Which properties (dimensions) of these tokens are relevant to answering the questions.
+
+Think of it as: <span style="color:red">**"What do I need to focus on to understand this input?"**</span>
+
+### K: metadata for retrieval
+
+The weight matrix 
+ adjusts the embedding to represent how the token provides information that others might find relevant. 
+
+For instance, it might highlight dimensions like syntactic roles or semantic cues.
+
+> The Key(K) matrix represents the metadata about each token, explaining:
+>
+>* What kind of information each token provides.
+>
+>* How the dimensions of the token’s embedding describe this information.
+
+Think of it as: <span style="color:red">**"Here’s my profile—this is what I can contribute and how to interpret me."**</span>
+
+### V: the content
+
+> Represents the actual content or information that each token contributes to the input sequence. 
+> This information is what the model ultimately uses after determining relevance via Query and Key interactions. 
+
+This transformation adjusts the embedding to emphasize dimensions that are relevant for the specific task or the context of the input sequence.
+
+Think of it as: <span style="color:red">**"Here’s the actual information I hold that can help you understand the sequence."**</span>
+
+The matrix is 
+* context aware of the token within the sequence
+* task specific relevance: for example, in a translation task, certain dimensions might focus on semantic roles (e.g., subject-object relationships), while in a summarization task, different dimensions might emphasize sentence importance.
+* preserves core information: The Value vector retains the core information from the embedding vector but filters and highlights the most task-relevant and context-relevant features.
+
+## The role of Q,K,V in transformers
+In a transformer, every token in a sequence acts like a detective:
+
+* Each token uses its **Query** to ask questions.
+
+* Every token presents its **Key** to show what kind of information it holds.
+
+* The token’s **Value** provides the actual content used after relevance is determined.
+
+* The alignment score $E=KQ$ is the relevance between Queries and Keys to determine how much attention each token should pay to others.
+
+This process enables dynamic, context-aware information sharing across the sequence.
 
 ![attention.png](img/attention.png)
 

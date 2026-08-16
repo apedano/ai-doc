@@ -60,5 +60,7 @@ nav:
   - index.md
   - NLP overview:
       - 1-NLP overview/index.md
+  - Transformers based models:
+      - 2-Tranformers based models/index.md
 
 
