@@ -62,5 +62,10 @@ nav:
       - 1-NLP overview/index.md
   - Transformers based models:
       - 2-Tranformers based models/index.md
+      - 2-Tranformers based models/attention_layer_example.md
+      - 2-Tranformers based models/transformer_components.md
+      - 2-Tranformers based models/transformer_example.md
+      - 2-Tranformers based models/Rope_example.md
+      - 2-Tranformers based models/bert_deep_dive.md
 
 

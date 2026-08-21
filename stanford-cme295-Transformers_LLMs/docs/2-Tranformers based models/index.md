@@ -1,382 +1,520 @@
-# Transformer based models
+# Transformers and attention mechanisms
 
-[Lecture 2 video](https://www.youtube.com/watch?v=yT84Y5zCnaA&list=PLoROMvodv4rOCXd21gf0CF4xr35yINeOy&index=2)
+## Documentation
 
-We have seen tranformers in
+STANFORD: https://www.youtube.com/watch?v=RQowiOF_FvQ
+https://arxiv.org/html/2604.00965v1
 
-* [Lesson](../../../dive-into-deep-learning/docs/011-transformers_and_attention_mechanisms/index.md)
-* [Transofmer section](/011-transformers_and_attention_mechanisms/#transformers)
+https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-seq2seq-models-with-attention/
+https://jalammar.github.io/illustrated-transformer/
 
-## Encoder-decode architecture for NLP
+## RNNs Vs Transformers
 
-![enc_dec_transf.png](img/enc_dec_transf.png)
+We have seen that RNNs are able to solve many kind of problem
 
-The left part is the encoder which receives the input, to the right we have the decoder part which produces
-the output.
+* one-to-one:
+* one-to-many: from a work to an image that represents that word
+* many-to-one: image classification problem
+* many-to-many: from a video to a description of it
 
-In case of language translation, the encoder processes the English input and the decoder produces the Franch
-translation.
+For instance, for image classification we have also CNN.
 
-## Position embeddings
+> After a very important article, <span style="color: red">*
+*[Attention is all you need](https://arxiv.org/abs/1706.03762)**</span>,
+> the concept of attention and transformers are considered a valid solution for all the mentioned
+> problems taking over the traditional CNN and RNN operators
 
-In the attention weights matrix we have seen how every Q token relates to the K values for all the other tokens in the
-sequence
+> Nowaday transformers (often in combination with sel-attention) are used <span style="color: red">**everywhere**</span>
 
-> How the attention mechanism relates a query token to the other tokens in the sequence to represent how that query is
-> linked to other elements in the sequence in a weighted manner
+## Sequence to sequence with RNNs: DECODER-ENCODER
 
-The self-attention mechanism analyses the sequence all together to produce Key, Values and attention, but it loses
-the relative position the single token had compared to the sequence.
+Based on the example of language translation from English to Italian
 
-For instance, the RNNs represent positioning very well with the BTT analysis.
+* **Input**: sequence $x_1,x_2,\dots,x_T$
+* **Output**: sequence $y_1,y_2,\dots,y_T$. The number of words in the input language can be different from the number
+  of words in the translation
 
-### Approach 1: learned position embeddings
+The encoder is a RNN where the inner state sequence is a function of the input and the
+previous hidden state
 
-> We want to <span style="color:red">**add position-specific embedding to the token vector**</span> learned during
-> training.
+> <span style="color: red">**ENCODER**</span>: $h_t=f_w\left(x_{t},h_{t-1}\right)$
 
+![rnn.png](img/rnn.png)
 
-PROS:
+The decoder produces an internal state from the input. We move towards the output with
+a DECODER.
 
-* good performance
+All the processing of the input sequence in the decoder is represented in a the
+<span style="color: red">**CONTEXT VECTOR**</span> $C$
 
-CONS:
+Often $C=h_T$ considering that the hidden state at the final time step incorporates information form all the previous
+hidden states in the past.
 
-* sensible to training set bias (if the trainig data contains always important tokens in the second position)
-* the learned values are up to the maximum sequence length in the training data: if, at inference time, there is a
-  sequence longer than the max in the training data it is a problem.
+The same way for the decoder, the ENCODER is a RNN with its <span style="color: red">**decoder hidden state
+**</span> $s_t$
 
-## Approach 2: calculate embeddings from a formula
+> <span style="color: red">**DECODER**</span>: $s_t=g_u\left(y_{t-1},c,s_{t-1}\right)$
 
-> We find an arbitrary formula to calculate the embedding based on the position from a predicted formula.
-> We create an additional position embedding vector which is added to the token embedding vector in a regular way
+![encoder_decoder.png](img/encoder_decoder.png)
 
-https://www.youtube.com/watch?v=IHu3QehUmrQ
+We see that the 4 input words generate 3 distinct output value.
 
-![positional_embedding_1.png](img/positional_embedding_1.png)
+### The problem of the fixed lenght of $C$
 
-* Suppose we have an embedding vector size of $d$ (we need the same size as the input vector to make the addition)
-* $pos$ is the position of the token in the sequence
-* $i$ is the currently calculated dimension of the embedding vector
-* the even positions are filled with $PE(pos, 2i)=cos\left(\frac{pos}{n^{2i/d}}\right)$
-* the odd positions are filled with $PE(pos, 2i+1)=sin\left(\frac{pos}{n^{2i/d}}\right)$
-* $n$ is a user-defined scalar, set to 10,000 by the authors of Attention Is All You Need.
-* the divisor factor of $\frac{pos}{n^{2i/d}}$ makes the $PE$ functions to hav high frequency changes for lower values
-  of $i$ and slower changes for higher $i$
+The only connection between the input sequence and the output sequence it <span style="color: red">**the fixed length of
+the context vector $C$**</span>
+which might be not enough for very long sequences (a paragraph, a book) or overidimensioned for small sequences (small
+sentences).
 
-### Frequency / wavelenght intuition
+> The **solution** is to look back at the entire input sequence at every time step to generate the output
 
-* When <span style="color:red">**$i=0$**</span> (the first dimension pair - consecutive values of $sin$ and $cosin$),
-  the denominator is $1000^0=1$
-  so we compute $sin(pos)$ and $cos(pos)$. <span style="color:red">**This oscillates rapidly:moving from position 0 to
-  position 6 covers roughly one full cycle**</span>.
+## Attention in RNN based sequence-to-sequence
 
-* When <span style="color:red">**$i=d/2-1$**</span> (the last dimension pair), the denominator is
-  approximately $1000^1$, so we compute $sin(\frac{pos}{1000})$ and $cosin(\frac{pos}{1000})$. This
-  oscillates <span style="color:red">**extremely slowly: you need 62,832 positions to complete one full cycle**</span>.
+Compared to the previous setup, we still have an encoder RNN and the second decoder RNN with the
+hidden state $s_t$
 
-the wavelength and the frequency are
+> This time the decoder hidden state at time stamp $t$ will be the scalar result of the linear activation  
+> of a combination of the encoder hidden state and the previous decoder hidden state called <span style="color: red">*
+*alignment scores**</span>
 
-$\lambda = 2\pi \cdot 1000^{2i/d}$ so the frequency is $f=1/\lambda=\frac{1}{2\pi \cdot 1000^{2i/d}}$
-
-The choice of 10000 as the base constant is also deliberate.
-
-A smaller base would cluster the wavelengths too close together.
-
-This provides redundant information in nearby dimensions.
-
-A larger base would spread them out but might leave some scale ranges uncovered.
-
-With 10000 and typical embedding dimensions of 256 or 512, the wavelengths range from about 6 positions up to 63,000
-positions,
-which comfortably covers sequences of any practical length at the time the paper was written.
-
-The exponent $2i/d$ creates a <span style="color:red">**geometric progression of frequencies**</span>.
-As $i$ increases from 0 to $d/2−1$, the exponent increases from 0 to approximately 1, and the denominator
-grows from 1 to 10000.
-
-> This exponential scaling ensures that each dimension pair captures position information at a different resolution.
-
-The spacing between frequencies is not arbitrary: it is chosen so that the wavelengths span a wide enough range to cover
-practical sequence lengths while keeping the total number of dimensions manageable.
-
-### How token position embeddings are calculated
-
-See how dimensions are represented as pairs of $sin$ (**solid line**) and $cosin$ (**dotten line**).
-
-They represent the same <span style="color:red">**decomposition of sound in harmonics**</span> or
-like <span style="color:red">**binary representation**</span>
-(where least significant bits change with high frequency and rightmost with lower frequency)
-
-![color_dimensions.png](img/color_dimensions.png)
-
-Here's the table using the same dimension pairs as the widget ($d_{model}=64$), with $\omega_i = 1/10000^{2i/64}$ and
-angle $= pos \times \omega_i$:
-Same data, reordered so position is the primary sort key (increasing), with all five dimension pairs grouped under each
-position:
-
-![pos_0.png](img/pos_0.png)
-
-| position | i  | dims (sin, cos) | ω_i      | angle (rad) | sin(angle) | cos(angle) |
-|----------|----|-----------------|----------|-------------|------------|------------|
-| 0        | 0  | 0, 1            | 1.000000 | 0.000000    | 0.0000     | 1.0000     |
-| 0        | 4  | 8, 9            | 0.316228 | 0.000000    | 0.0000     | 1.0000     |
-| 0        | 8  | 16, 17          | 0.100000 | 0.000000    | 0.0000     | 1.0000     |
-| 0        | 16 | 32, 33          | 0.010000 | 0.000000    | 0.0000     | 1.0000     |
-| 0        | 31 | 62, 63          | 0.000133 | 0.000000    | 0.0000     | 1.0000     |
-
-![pos_1.png](img/pos_1.png)
-
-| position | i  | dims (sin, cos) | ω_i      | angle (rad) | sin(angle) | cos(angle) |
-|----------|----|-----------------|----------|-------------|------------|------------|
-| 1        | 0  | 0, 1            | 1.000000 | 1.000000    | 0.8415     | 0.5403     |
-| 1        | 4  | 8, 9            | 0.316228 | 0.316228    | 0.3110     | 0.9504     |
-| 1        | 8  | 16, 17          | 0.100000 | 0.100000    | 0.0998     | 0.9950     |
-| 1        | 16 | 32, 33          | 0.010000 | 0.010000    | 0.0100     | 0.9999     |
-| 1        | 31 | 62, 63          | 0.000133 | 0.000133    | 0.0001     | 1.0000     |
-
-![pos_2.png](img/pos_2.png)
-
-| position | i  | dims (sin, cos) | ω_i      | angle (rad) | sin(angle) | cos(angle) |
-|----------|----|-----------------|----------|-------------|------------|------------|
-| 2        | 0  | 0, 1            | 1.000000 | 2.000000    | 0.9093     | -0.4161    |
-| 2        | 4  | 8, 9            | 0.316228 | 0.632456    | 0.5911     | 0.8066     |
-| 2        | 8  | 16, 17          | 0.100000 | 0.200000    | 0.1987     | 0.9801     |
-| 2        | 16 | 32, 33          | 0.010000 | 0.020000    | 0.0200     | 0.9998     |
-| 2        | 31 | 62, 63          | 0.000133 | 0.000267    | 0.0003     | 1.0000     |
-
-![pos_5.png](img/pos_5.png)
-
-| position | i  | dims (sin, cos) | ω_i      | angle (rad) | sin(angle) | cos(angle) |
-|----------|----|-----------------|----------|-------------|------------|------------|
-| 5        | 0  | 0, 1            | 1.000000 | 5.000000    | -0.9589    | 0.2837     |
-| 5        | 4  | 8, 9            | 0.316228 | 1.581139    | 1.0000     | -0.0103    |
-| 5        | 8  | 16, 17          | 0.100000 | 0.500000    | 0.4794     | 0.8776     |
-| 5        | 16 | 32, 33          | 0.010000 | 0.050000    | 0.0500     | 0.9988     |
-| 5        | 31 | 62, 63          | 0.000133 | 0.000667    | 0.0007     | 1.0000     |
-
-![pos_10.png](img/pos_10.png)
-
-| position | i  | dims (sin, cos) | ω_i      | angle (rad) | sin(angle) | cos(angle) |
-|----------|----|-----------------|----------|-------------|------------|------------|
-| 10       | 0  | 0, 1            | 1.000000 | 10.000000   | -0.5440    | -0.8391    |
-| 10       | 4  | 8, 9            | 0.316228 | 3.162278    | -0.0207    | -0.9998    |
-| 10       | 8  | 16, 17          | 0.100000 | 1.000000    | 0.8415     | 0.5403     |
-| 10       | 16 | 32, 33          | 0.010000 | 0.100000    | 0.0998     | 0.9950     |
-| 10       | 31 | 62, 63          | 0.000133 | 0.001334    | 0.0013     | 1.0000     |
-
-![pos_25.png](img/pos_25.png)
-
-| position | i  | dims (sin, cos) | ω_i      | angle (rad) | sin(angle) | cos(angle) |
-|----------|----|-----------------|----------|-------------|------------|------------|
-| 25       | 0  | 0, 1            | 1.000000 | 25.000000   | -0.1324    | 0.9912     |
-| 25       | 4  | 8, 9            | 0.316228 | 7.905694    | 0.9987     | -0.0517    |
-| 25       | 8  | 16, 17          | 0.100000 | 2.500000    | 0.5985     | -0.8011    |
-| 25       | 16 | 32, 33          | 0.010000 | 0.250000    | 0.2474     | 0.9689     |
-| 25       | 31 | 62, 63          | 0.000133 | 0.003334    | 0.0033     | 1.0000     |
-
-![pos_50.png](img/pos_50.png)
-
-| position | i  | dims (sin, cos) | ω_i      | angle (rad) | sin(angle) | cos(angle) |
-|----------|----|-----------------|----------|-------------|------------|------------|
-| 50       | 0  | 0, 1            | 1.000000 | 50.000000   | -0.2624    | 0.9650     |
-| 50       | 4  | 8, 9            | 0.316228 | 15.811388   | -0.1032    | -0.9947    |
-| 50       | 8  | 16, 17          | 0.100000 | 5.000000    | -0.9589    | 0.2837     |
-| 50       | 16 | 32, 33          | 0.010000 | 0.500000    | 0.4794     | 0.8776     |
-| 50       | 31 | 62, 63          | 0.000133 | 0.006668    | 0.0067     | 1.0000     |
-
-This grouping is closer to how you'd read a single token's actual PE vector: for a fixed position, scan down through `i`
-and you can see the full spread — dims near `i=0` already look essentially random/uncorrelated between nearby positions,
-while dims near `i=31` change so gradually that cos stays at 1.0000 out to 4 decimals across the entire range shown.
-
-### Angle representation
-
-From the image we can see that the $i-th$ <span style="color:red">**position pair**</span> can be expressed as the $sin$
-and $cos$ of a certain angle in radiants.
-
-$$PE(pos,\omega_i)=\begin{bmatrix}sin(pos\omega_i) & cos(pos\omega_i) \end{bmatrix}$$
-
-### Intuition
-
-> If, for each position of a token in the input sequence we add a vector with values from sin and cosin from many
-> harmonics
-> we will add every time different vectors (the values will repeat after 10000 positions) so that the neural network can
-> learn the positioning info inside the input (each first token in every sequence will take the same position embedding
-> vector)
-
-### Similarity
-
-> The position embedding generates high similarity for close positions
-
-IF we calculate the embedding similarity for two position embeddings $PE_m$ amd $PE_n$ ($n=m+k$), with **cosin
-similarity** we have
-
-$$\text{sim}(PE_m,PE_m)=\frac{PE_m \cdot PE_n}{\Vert PE_m\Vert\Vert PE_n\Vert} \in [-1,1]$$
-
-if we ignore the module at the denominator we have the dot product of the angle notation of the position embedding
-
-At a single position $i$
-
-$PE_m \cdot PE_{m+k}^\mathsf{T}=\begin{bmatrix}sin(m \omega_i) & cos(m \omega_i) \end{bmatrix}\cdot\begin{bmatrix}sin(m+k \omega_i) \\ cos(m+k \omega_i) \end{bmatrix}=$
-
-$=sin(m \omega_i)sin(m+k \omega_i)+cos(m \omega_i)cos(m+k \omega_i)$
-
-Recalling the trigonometric rule $cos(A-B)=sin(A)sin(B)+cosin(A)cosin(B)$
-
-$PE_m \cdot PE_{m+k}^\mathsf{T}=cos((m+k)\omega_i-m\omega_i)=cos(k\omega_i)$
-
-* for values of $K \rightarrow 0$ we have $PE_m \cdot PE_{m+k} \rightarrow 1$ <span style="color:red">**high similarity
-  **</span>
-* for opposite angles $K \rightarrow \pi$ we have $PE_m \cdot PE_{m+k} \rightarrow -1$ <span style="color:red">**min
-  similarity**</span>
-
-We can extend this to the full vector
-
-> $$PE(pos)⋅PE(pos+k)=\sum_{i=0}^{dmodel/2−1}cos(k\omega_i)$$
-
-![embedding_similarity.png](img/embedding_similarity.png)
-
-On the embedding picture we see the high frequency in low values of dimension and positions and how the corresponding
-similarity
-is higher on the diagonal.
-
-### Advantage compared to learned embedding
-
-> We can calculate the position embeddign for any sequence length
-
-## Relative position embedding
-
-* Position embedding represents positions over the whole sequence.
-* Position embedding vectors are added to the $X$ vector, as input to the entire transformer
-
-In transformer NLP we are more interested in the context.
-
-| We are more interested in token relative positioning in the sequence in the self-attention computation in the attention layer | ![attention_layer_transformer.png](img/attention_layer_transformer.png)                                                                       |
-|-------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
-
-We change the attention formula to represent that close token have larger similarity
-
-### Self-attention layer formula bias
-
-![self_att_bias.png](img/self_att_bias.png)
-
-We add a bias term to the sel-atention layer output to represent relative positions
-
-$$softmax\left(\frac{\langle q_m,k_n\rangle}{\sqrt{d_k}}+bias(m,n)\right)$$
-
-We add a bias proportional to the relative distance between positions $m$ and $n$
-
-There are two possible solutions:
-
-* **T5 bias**: bucket values of bias learnable by the network for each self-attention head $bias(m,n)=\beta_{bucket(m,n)}$
-* **ALiBi**. Bias is linear, deterministic, not bounded $bias(m,n)=\mu(n-m)$
-
-## RoPE = Rotary Position Embeddings
-
-We can also epress the relative positions in terms of a rotation of a vector to a certain angle. 
-
-```text
-y
-   ^
-   |
-   |          V = (x, y)
-   |         /|
-   |        / |
-   |       /  |
- r |      /   | y = r sin(φ)
-   |     /    |
-   |    /     |
-   |   /      |
-   |  / φ     |
-   | /_)______|________________> x
-   O          x = r cos(φ)
-
-  Cartesian:  V = (x, y)
-  Angular:    V = (r, φ)      r = sqrt(x² + y²)
-                               φ = atan2(y, x)
-
-  Conversion:  x = r·cos(φ)
-               y = r·sin(φ)
-```
-
-so that a vector $V(x,y) \rightarrow V(r,\varphi)$ so that $V=\begin{pmatrix}   r\cdot cos(\varphi) &&   r\cdot sin(\varphi)   \end{pmatrix}$
-
-> <span style="color:red">**Vector in angular coordinates**</span> $V(r,\varphi)=\begin{pmatrix}   r\cdot cos(\varphi) ,   r\cdot sin(\varphi)   \end{pmatrix}$
-
-### Vector rotation
-
-> <span style="color:red">**Rotation matrix**</span>: $R_\alpha=\begin{pmatrix}   cos(\alpha) & -sin(\alpha) \\   sin(\alpha) & cos(\alpha) \end{pmatrix}$
-
-We apply the rotation $R_{m,\theta}$ (we apply of an angle dependent on the position) to $V$
-
-$V\cdot R_{m,\theta}=\begin{pmatrix}   r\cdot cos(\varphi) &&   r\cdot sin(\varphi)   \end{pmatrix}\begin{pmatrix}   cos(m\theta) & -sin(m\theta) \\   sin(m\theta) & cos(m\theta) \end{pmatrix}=$
-
-$=\begin{pmatrix}   r\cdot cos(\varphi)cos(m\theta)+r\cdot sin(\varphi)sin(m\theta) &&   -r\cdot cos(\varphi)sin(m\theta)+r\cdot sin(\varphi)cos(m\theta)   \end{pmatrix}$
-
-If we remember the trigonometric properties
-
-> <span style="color:red">**cosin of difference**</span> 
-> $cos(A-B)=sin(A)sin(B)+cos(A)cos(B)$
-
-> <span style="color:red">**sin of difference**</span> 
-> $sin(A-B)=sin(A)cos(B)-cos(A)sin(B)$
-
-then we have 
-
->$$V\cdot R_{m,\theta}=\begin{pmatrix}   r\cdot cos(\varphi-m\theta) &&   r\cdot sin(\varphi-m\theta)   \end{pmatrix}$$
-
-
-### Intuition: benefit
-
-The idea is to apply a rotation (applying the matrix above) to the query and key vectors. 
-
-The advantage is that it is still a matrix operation that is computationally efficient
-
-![rope.png](img/rope.png)
-
-> we want to represent similarity in terms of rotations, so <span style="color:red">**$rotation \propto similarity $**</span> .
-
-If we recall the self attention layer formula:
-
-$\text{Attention}(Q,K,V)=\text{softmax}(\frac{QK^\mathsf{T}}{\sqrt{d_k}})V$
-
-and we focus on the score part, dependent on the input query and key vectors:
-
-$Q_mK_n^\mathsf{T}=$ and, as in the picture above we rotate the two vectors by $m\theta$ and
-$n\theta$ respectively, we have
-
-$Q'_m=Q_mR(m\theta)$ and $K'_n=K_nR(n\theta)$ and we recalculate the score
-
-$$Q'_mK^{'{\mathsf{T}}}_n=Q_mR(m\theta)(K_nR(n\theta))^{\mathsf{T}}=Q_mR(m\theta)R(n\theta)^{\mathsf{T}}K_n^{\mathsf{T}}$$
-
-Since we know that $R(\alpha)R(\beta)=R(\alpha+\beta)$ and $R(\alpha)^{\mathsf{T}}=R(-\alpha)$
-
-we have [from gemini last question]
-
-
-
-
-
-### RoPE multi-dimension
-
-In case of multidimension for dimension $d$ vectors, the rotation is applied to blocks of 2, so $d/2$ blocks are processed
-
-$\textbf{R}_{\theta,m}=
-\begin{bmatrix}
-\textbf{block}_1 & 0 & \cdots & 0 \\
-0 & \textbf{block}_2 & \cdots & 0 \\
-\vdots & \vdots & \ddots & \vdots \\
-0 & 0 & \cdots & \textbf{block}_{d_k/2} \\
-\end{bmatrix}$
+$$e_{t,i}=f_{att}\left(s_{t-1},h_i\right) \:(scalar)$$
 
 where
 
-$\textbf{block}_i=
-\begin{pmatrix}
-cos(m\theta_i) & -sin(m\theta_i) \\
-sin(m\theta_i) & cos(m\theta_i) 
-\end{pmatrix}$
+* $t$ is the decoder time step
+* $i$ is the encoder time step
 
-The rotation matrix is applicable to the input vectors to add a bias to the self-attention layer 
-as described in the article, attention is all you need.
+Among all possible ways to have $f_{att}$ combine the vectors a linear transformation is ofter used
+
+The alignent scores are arbitrary scalar, so we need to bound their values using the $softmax$ function in order
+to obtain a probability distribution from them called <span style="color: red">**attention weight**</span>.
+
+$$a_{t,i}=softmax(e_{t,i})$$
+
+$0 \lt a_{t,i} \lt 1$ and $\sum_{i}a_{t,i}=1$ for each time step
+
+> the attention score is best understood as **how much attention the decoder should pay to the i-th input word
+> when generating the t-th output word**.
+
+
+We can now compute a new <span style="color: red">**context vector**</span> as the weighted some of all attention
+weights over the corresponding encoder
+hidden state.
+
+> The context vector becomes dependent on all the hidden states (past and future) of the encoder RNN
+
+$$c_{t}=\sum_ia_{t,i}h_i$$
+
+So, the <span style="color:red">**decoder RNN hidden state**</span>  becomes
+
+$$s_t=g_u(y_{t-1},s_{t-1},c_t)$$
+
+> INTUITION: the context vector attends to relevant part of the input sequence to generate the current output
+> through $a_{i,t}$
+
+An example is the generation of $y_1=vediamo$ which might have the following attention weights
+
+$a_{1,1}=a_{1,2}=0.45$ for ($x_1=$_we_ and $x_2=$_see_) and $a_{1,3}=a_{1,4}=0.05$ for ($x_3=$_the_ and $x_4=$_sky_)
+
+This makes the first two imputs the most relevant to generate the first output, therefore the "attention" focuses on
+those.
+
+> INTUITION: all this mechansm is "differentiable" we don't need to pass the architecture any grammar of sentence
+> construction rule,to produce translation.
+> The network is trained as any normal other network with a training set using the cross entropy output loss . The
+> attention addition
+> created the capability of the network to include the "context" in the elaboration of each and every output in time.
+> Furthermore, by looking at the attention weight we can observe what the network is looking at while producing the
+> output
+
+![decoder_attention_encoder.png](img/decoder_attention_encoder.png)
+
+We see here the process of generating the context vector for the time step 2 $c_2$
+
+all the alignment scores $e_{2,t}$, the probability $a_{2,t}$, combined with the decoder hidden states.
+
+### Benefits of attention in encode-decoder architecture
+
+> One context vector for each time step of the decoder generation time step
+
+> At every time step, the context vector "looks" at different parts of the input sequence
+
+> the input sequence is not bottlenecked by the fixed length context vector as seen before
+
+### Visualization of attention weights
+
+![attention_weights_visual.png](img/attention_weights_visual.png)
+
+The weight matrix shows how the weights are distributed: the $t$ on the row shows how the $i$ column inputs have
+contributed
+to the output at the same $t$ time step.
+
+## Extract attention as a separated operator
+
+We try to pull out the structures of attention from the encoder-decoder architecture. Here are the elements
+that we can isolate from the RNNs parts:
+
+* <span style="color:green">**query vectors**</span> a sequence of vectors to use to produce the output (the hidden
+  states of the encoder RNN)
+* <span style="color:blue">**data vectors**</span> the data we want to summerize query vectors. Is a sequence of
+  vectors (the decoder RNN hidden state vectors)
+* <span style="color:orange">**output vectors**</span> the output produced (the context vector in the encoder-decoder)
+
+![attention_from_enc_dec.png](img/attention_from_enc_dec.png)
+
+We can generalize it to extract the attention layer
+
+We first get the <span style="color:red">**inputs**</span>
+
+* one <span style="color:green">**query vector**</span> $ q \in \mathbb{R}[D_Q] $
+* <span style="color:blue">**data vectors**</span> $X \in \mathbb{R}[N_X \times D_Q]$
+
+We do the <span style="color:red">**computations**</span>:
+
+* **similarities**: we need to combine the query and the data vector and get the score. The easiest is the **dot product
+  ** that we need to scale in order to avoid vanishing gradients when we calculate the softmax.
+    * Remember the dot product of two
+      vectors $a,b \in \mathbb{R}^{D}$ $a \cdot b = \vert a \vert\vert b\vert\cos(\hat{ab}) \Rightarrow \vert a \vert = \sqrt{\sum_ia_i^2}=a\sqrt{D}$
+    * similarity  $e_i=q \cdot X_i \frac{1}{\sqrt{Q}} \in \mathbb{R}[N_X]$
+
+* **attention weights**: $a=softmax(e) \in \mathbb{R}[N_X]$
+* <span style="color:orange">**output vector**</span>: $y=\sum_ia_iX_i \in \mathbb{R}[D_X]$
+
+![attention_layer_single.png](img/attention_layer_single.png)
+
+### Matrix formulation of attention layer
+
+A next generalization is to process multiple query vectors at the same time by concatenating them into a
+matrix, in order to parallelize the computation and improve efficiency.
+
+We first get the <span style="color:red">**inputs**</span>
+
+* multiple <span style="color:green">**query vectors**</span> $ Q \in \mathbb{R}[N_Q \times D_Q] $
+    * every row is a vector of dimension $D_Q$)
+
+* <span style="color:blue">**data vectors**</span> $X \in \mathbb{R}[N_X \times D_Q]$
+
+We do the <span style="color:red">**computations**</span>:
+
+* **similarities**: $E=Q X^\mathsf{T} \frac{1}{\sqrt{D_Q}} \in \mathbb{R}[N_Q \times N_X]$
+    * we compute similarities for all query vectors where every single vector is a dot product with all data vectors
+    * $E_{ij}=Q_i X_j \frac{1}{\sqrt{D_Q}}$
+    * this is very fast to implement matrix products
+
+* **attention weights**: $A=softmax(E, dim=1) \in \mathbb{R}[N_Q \times N_X]$
+    * we want to compute the probability distribution for each query vector independently
+    * we do it for the dimension 1 (by row) resulting in the number of data vectors times the number of data vectors
+    * each row is the distribution of probabilities of a data vector
+
+* <span style="color:orange">**output vectors**</span>: $Y=AX \in \mathbb{R}[N_Q \times D_X]$
+    * each row element is the weighted sum of the attention weights multiplied the data vectors
+    * $y_i=\sum_jA_{i,j}X_j$ this is the i-th output vector that is the row of $Y$
+
+## Cross-Attention
+
+The data matrix $X$ is involved in two places:
+
+* in the input for the calculation of similarities
+* in the output as the apllication of the attention weight matrix
+
+We can split these usages by letting the network train separately the way the data matrix is used.
+We do this by **projecting (with linear transformations) the data vectors into two vectors ($K$ for keys and $V$ for
+values)** using two differentiable dedicated
+weight matrices (those matrices are inputs of the attention operator).
+
+<span style="color:red">**INPUTS**</span>
+
+* <span style="color:green">**query vectors**</span> $ Q \in \mathbb{R}[N_Q \times D_Q] $
+* <span style="color:blue">**data vectors**</span> $X \in \mathbb{R}[N_X \times D_Q]$
+* <span style="color:orange">**key weight matrix**</span> $W_K \in \mathbb{R}[D_X \times D_Q]$
+* <span style="color:blue">**value weight matrix**</span> $W_V \in \mathbb{R}[D_X \times D_V]$
+
+<span style="color:red">**COMPUTATION**</span>
+
+* <span style="color:orange">**key matrix**</span> $K=XW_K \in \mathbb{R}[N_X \times D_Q]$
+* <span style="color:blue">**value matrix**</span> $V=XW_V \in \mathbb{R}[N_X \times D_V]$
+
+* **similarities**: $E=Q K^\mathsf{T} \frac{1}{\sqrt{D_Q}} \in \mathbb{R}[N_Q \times N_X]$
+    * we compute similarities for all query vectors where every single vector is a dot product with all data vectors
+    * $E_{ij}=Q_i K_j \frac{1}{\sqrt{D_Q}}$
+    * this is very fast to implement matrix products
+
+* **attention weights**: $A=softmax(E, dim=1) \in \mathbb{R}[N_Q \times N_X]$
+    * we want to compute the probability distribution for each query vector independently
+    * we do it for the dimension 1 (by row) resulting in the number of data vectors times the number of data vectors
+    * each row is the distribution of probabilities of a data vector
+
+* <span style="color:orange">**output vectors**</span>: $Y=AV^\mathsf{T} \in \mathbb{R}[N_Q \times D_X]$
+    * each row element is the weighted sum of the attention weights multiplied the data vectors
+    * $y_i=\sum_jA_{i,j}V_j$ this is the i-th output vector that is the row of $Y$
+
+In principle $D_Q \not= D_V$
+
+> INTUITION: Learning $W_K$ and $W_V$ as separate matrices gives the model two independent degrees of freedom to shape
+> these two very different tasks,
+> which empirically gives much richer representational capacity than tying them together.
+>
+> Taking a book store as example, through this separation we can differentiate what of the data is most relevant to
+> identify the KEYs to be used
+> in the search (title, subject tags, keywords), which are optimized for searching.
+> Only after matching, it can be decided what to retrieve (the value), which might be verbose, high-dimensional, or
+> structured very differently from the key
+> (the book content)
+
+![key_value_attention.png](img/key_value_attention.png)
+
+> The vector are organized by row, so each row in the query matrix produces attention weight distribution
+> on the corresponding row (values sum up to 1) and the same row is the output in the $Y$ matrix
+
+> We have achieved a reusable network component with its own inputs and output. This is called
+> <span style="color:red">**Cross-Attention layer**</span> because it is based on two inputs, data and query vectors
+> (the layer is cross attending two different inputs
+
+## Self-attention layer
+
+> Here we have only one set of inputs, the data vectors <span style="color:blue">**$X$**</span>, therefore the query
+> vector matrix <span style="color:orange">**$Q$**</span> via a linear transformation of the data vectors
+> via <span style="color:green">**$W_Q$**</span>
+
+![self_attention_layer.png](img/self_attention_layer.png)
+
+### More efficient version
+
+There is a second version of the layer when the matrices are merged for computation efficiency
+
+![efficient_self_attention_layer.png](img/efficient_self_attention_layer.png)
+
+### Masked self attention
+
+We might want that the attention mechanism is somehow limited to not involve all the data over time steps.
+
+For instance, we might want attention to apply only on present and past time step inputs, meaning **"a no look ahead
+approach"**
+
+In this case we can add a <span style="color:red">**mask matrix**</span>
+
+![masked_self_attention.png](img/masked_self_attention.png)
+
+### Multiheaded self-attention layer
+
+in order to make the attention layer more powerful and have more capacity we parallelize multiple self-attention layers
+
+![multiheaded_self_attention.png](img/multiheaded_self_attention.png)
+
+* the input is projected to all heads, single self-attention layers
+* each "head" will produce its own output
+* usually each head has different weight initialization in order to way differently
+* the single output is stacked and fused with some linear transformation to produce the outer
+  output <span style="color:red">**$O$**</span>
+
+> <span style="color:red">**This is the most used version of attention layers in real applications**</span>
+
+> This structure is also easy to implement because, it can be done by just 4 (big) matrix multiplication that is
+> highly performant and scalable operation.
+
+![multiheader_self_attention_impl.png](img/multiheader_self_attention_impl.png)
+
+## Difference between sel-attention and cross-attention layers
+
+Think of **self-attention** as a group of people having a discussion — everyone talks to everyone, and each person's
+opinion gets updated based on the others in the same room.
+
+Think of **cross-attention** as one person consulting a reference book while writing something — the book (the memory,
+K/V) doesn't change or attend to anything; it just sits there as a fixed resource. The writer (the query) is the only
+one doing the "looking," and can look up whatever's relevant regardless of how the book is organized internally.
+
+## Ways of processing sequences
+
+### RNN
+
+![rnn_solution.png](img/rnn_solution.png)
+
+| Pros                                               | Cons                                                                              |
+|----------------------------------------------------|-----------------------------------------------------------------------------------|
+| performant: $O(n)$ for memory and computation<br/> | the hiddent state dependent on previous hidden states makes it a serial algorithm |
+| scales good on long sequences                      | not parallelizable                                                                |
+
+### Convolution
+
+![convolution_solution.png](img/convolution_solution.png)
+
+| Pros                      | Cons                                                                                                                                  |
+|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| good at processing images | parallelizable: the same kernel can be applied in parallel on different area of the input image                                       |
+|                           | does not scale well with the input size: bigger images require larger kernels and more computation or stack many convolutional layers |
+
+### Self-attention
+
+![self_attention_solution.png](img/self_attention_solution.png)
+
+| Pros                                                                  | Cons                                                                              |
+|-----------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| works on sets of vectors                                              | computational heavy: $O(n^2)$ compute, $O(n^2)$ memory for sequence of length $n$ |
+| easy to scale to long sequences                                       | the computational problem can be mitigated increasing the computation capacity    |
+| parallelizable: only 4 matmuls                                        |                                                                                   |
+| with parallel processing we can mitigate the computational complexity |                                                                                   |
+
+> The drowback of the higher computational requirement can be seen as a benefit in the sense that the network
+> performs more computation so that can produce more elaborated precise results
+
+## Transformers
+
+A transformer is build from concatenation of **transformer blocks**
+
+### Transformer Blocks
+
+![transformer_block.png](img/transformer_block.png)
+
+#### Input
+
+The input is a <span style="color:blue">**set of vectors $X$**</span>
+
+#### Self-attention layer
+
+The input is transferred to a multihead self-attention layer that manipulates the input <span style="color:red">*
+*identifying
+relationships among the input vectors**</span> themselves that are useful to produce the output
+
+#### Residual connection
+
+This is
+
+$$Z=X+\text{selfAtt}(X)$$
+
+Using the self attention output directly with no residual, every layer would be forced to rebuild all the information
+from the previous layer using only weighted averages of $𝑉$.
+
+Anything not well-represented in that particular attention pattern would simply be lost.
+
+> The residual instead reframes attention's job as computing a correction term added to what's already in the output
+
+#### Layer normalization
+
+![ln_in_transformer.png](img/ln_in_transformer.png)
+
+LayerNorm's job is to **stabilize the scale and distribution of activations flowing through each token**,
+independently for every token, so that deep stacks of attention + FFN layers don't suffer from exploding/vanishing
+activations or wildly different feature scales across dimensions.
+
+The normalization is applied on both the attention and the feed forward network layer.
+
+being $Z=X+\text{subLayer}(X)$ where $\text{subLayer}$ can be either the $\text{multiHeadAttention}$ or $\text{FFN}$
+
+1) **Main across input vectors**
+
+For the row $i$, being the $i-\text{th}$ input vector of dimension $D$ the mean is
+
+$$\mu_i=\frac{1}{D}\sum_{k=1}^{D}z_{ik}$$
+
+2) **Variance across input vectors**
+
+$$\sigma_i=\frac{1}{D}\sum_{k=1}^{D}\left(z_{ik}-\mu_i\right)^2$$
+
+3) **normalize (zero mean, unit variance), with ϵ a small constant for numerical stability**
+
+$$\hat z_{ik}=\frac{z_{ik}-\mu_i}{\sqrt{\mu_i^2+\epsilon}}$$
+
+4) **learnable affine transform (scale $\gamma \in \mathbb{R}^D$, shift $\beta \in \mathbb{R}^D$, both learned
+   parameters, applied elementwise**
+
+$$y_{i,k}=\gamma_k\hat z_{ik}+\beta_k$$
+
+We distinguish to type of applications of NL
+
+Nowadays the common usage of normalization is based on $RootMeanSquare=\sqrt{\frac{1}{N}\sum_i{x_i^2}}$
+
+| As in the transform paper           | More used nowadays                                                                |
+|-------------------------------------|-----------------------------------------------------------------------------------|
+| ![post_norm.png](img/post_norm.png) | ![pre_norm.png](img/pre_norm.png)                                                 |
+| $\gamma_k\hat z_{ik}+\beta_k$       | $\gamma_k\frac{x_{ik}}{RMS(x_{ik})}$                                              |
+|                                     | Same convergence as the other approach but one less learnable parameter ($\beta$) |
+
+#### MLP layer
+
+the <span style="color:red">**vectors are now processed independently**</span> in a Multi level perceptor layer
+which is the perfect combination of the interleaved processing performed by the self-attention layer.
+
+> Usually is it a standard two-layer MLP $D \rightarrow 4D \rightarrow D$ running independently on each vector
+
+<span style="color:red">**1:03:09**</span>
+
+#### Last residual connection and normalization
+
+Residual connection and normalization are executed again before the output is returned.
+
+### Transformer composition
+
+A transformer is a sequence of transformer blocks
+
+|                                         |                                                                   |
+|-----------------------------------------|-------------------------------------------------------------------|
+| ![transformer.png](img/transformer.png) | ![transformer_applications.png](img/transformer_applications.png) |
+
+## Transformer application examples
+
+### In LLM
+
+![transformers_in_llm.png](img/transformers_in_llm.png)
+
+### In image processing
+
+![trasformer_in_img_processing.png](img/trasformer_in_img_processing.png)
+
+## Transformer parameter count (example in LLM application)
+
+Notation:
+
+* $d = d_{model}$ (vector dimension)
+
+* $h$ = number of heads in multihead self-attention layer
+
+* $d_k=d_v=d/h$ (Key and value dimensions)
+
+* $d_{ff}$ = FFN hidden dim (typically $4d$)
+
+* $L$ =number of blocks
+
+* $V$ = vocabulary size
+
+* $n_{max}$ = max sequence length (only relevant if positional embeddings are learned).
+
+## Per-component parameter counts
+
+| Component                             | Formula                              | With $d_{ff}=4d$              |
+|---------------------------------------|--------------------------------------|-------------------------------|
+| $W_Q, W_K, W_V$ (combined, all heads) | $3\,(d\cdot d + d)$                  | $3d^2+3d$                     |
+| $W_O$ (output projection)             | $d\cdot d + d$                       | $d^2+d$                       |
+| **Attention total**                   | $4d^2+4d$                            | $4d^2+4d$                     |
+| $W_1, b_1$ (FFN layer 1)              | $d\cdot d_{ff}+d_{ff}$               | $4d^2+4d$                     |
+| $W_2, b_2$ (FFN layer 2)              | $d_{ff}\cdot d+d$                    | $4d^2+d$                      |
+| **FFN total** (MLP)                   | $2d\,d_{ff}+d_{ff}+d$                | $8d^2+5d$                     |
+| LayerNorm ×2 ($\gamma,\beta$ each)    | $2(d+d)$                             | $4d$                          |
+| **Per-block total**                   | $12d^2+13d$                          | $\approx 12d^2$ for large $d$ |
+| $L$ stacked blocks                    | $L\,(12d^2+13d)$                     | —                             |
+| Token embeddings (tied with output)   | $V\cdot d$                           | —                             |
+| Positional embeddings (if learned)    | $n_{max}\cdot d$                     | —                             |
+| **Full model total**                  | $L\,(12d^2+13d) + Vd\,(+\,n_{max}d)$ | —                             |
+
+## Worked example: GPT-2 small
+
+$d=768,\ L=12,\ V=50257,\ n_{max}=1024$
+
+| Component                          | Calculation               | Parameters (≈) |
+|------------------------------------|---------------------------|----------------|
+| Per-block ($12d^2+13d$)            | $12\cdot768^2+13\cdot768$ | 7,087,872      |
+| All 12 blocks                      | $12 \times 7{,}087{,}872$ | 85.1M          |
+| Token embeddings ($Vd$)            | $50257\times768$          | 38.6M          |
+| Positional embeddings ($n_{max}d$) | $1024\times768$           | 0.8M           |
+| **Total**                          | sum of the above          | **≈124.5M**    |
+
+Matches GPT-2 small's documented ~124M parameters, confirming the formula. The $12d^2$ per-block term dominates and
+scales quadratically with $d_{model}$, while embeddings scale only linearly with $d$ (times $V$) — which is why
+increasing $d_{model}$ grows the model far faster than adding more layers $L$.
+
+
+
+
+
+
+
 
