@@ -499,7 +499,99 @@ The BERT FFN function expands to 3072 dimensions:
 
 ## Output
 
-https://chatgpt.com/c/6a8865a5-7944-83eb-900f-c09764b9fe07
+> BERT does not produce a single output like a traditional sequence-to-sequence model. 
+
+> It produces a <span style="color: red">**contextual vector for every input token**</span>, and then different task-specific output layers can use those vectors.
+
+
+### Single token output
+
+For instance, Bert output for token `bank` is a 768 dimensioned vector that, thanks to self-attention layer 
+contains <u>**contextual information of tokens in the input sequence**</u>
+
+```text
+"The bank approved my loan."
+       ↑
+      bank
+       │
+       └── influenced by "loan", "approved", "my", ...
+```
+### `[CLS]` special token output
+
+> The `[CLS]` contextual vector output represents information about the whole input sequence.
+
+```text
+[CLS]
+  │
+  ▼
+[representation of the whole input]
+  │
+  ├── "bank"
+  ├── "loan"
+  ├── "money"
+  ├── "transferred"
+  └── relationship between the sentences
+```
+
+### MLM and NSP pre-training output
+
+We have seen that during training the output contectual vectors are used for the two training tasks.
+
+| Task    | Input to prediction head        | What it predicts                                |
+| ------- | ------------------------------- | ----------------------------------------------- |
+| **NSP** | `[CLS]` representation          | Whether sentence B follows sentence A           |
+| **MLM** | Representation of each `[MASK]` | Which vocabulary token belongs at that position |
+
+> the two subtasks predictors, non-linear FFN, are attached to the applicable contextual vectors
+
+#### NSP predictor
+
+```text
+BERT output
+    │
+    ├── h_CLS (768 dimensions contextual vector of [CLS])
+    │
+    ▼
+NSP prediction head (FFN)
+    │
+    ▼
+2 logits
+    │
+    ▼
+  softmax 
+    │
+    ▼  
+P[IsNext, NotNext] probabilities
+```
+
+#### MLM predictor
+
+```text
+h_[MASK] (768)
+      │
+      ▼
+Linear (768->N)
+      │
+      ▼
+GELU
+      │
+      ▼
+LayerNorm 
+      │
+      ▼
+Linear (N->~30,000)
+      │
+      ▼
+~30,000 vocabulary logits 
+    │
+    ▼
+ softmax (probability distribution of the [MASK] token being that vocabulary position
+```
+
+#### Fine tuning for a specific target task
+
+> The output of BERT can be attached to a specific target TASK HEAD that is trained in the fine-tuning stage
+> to adapt BERT parameters to the specific target
 
 
 ## Specifications
