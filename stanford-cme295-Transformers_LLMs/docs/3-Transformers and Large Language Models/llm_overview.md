@@ -211,7 +211,7 @@ $$loss_{additional}=\alpha N \sum_i^Nf_iP_i$$
 * $alpha$: hyperparameter
 * $N$ number of experts of MoE
 * $f_i$ fraction of tokens routed to expert $i$
-* $P_i$ everage probability of token being routed to expert $i$
+* $P_i$ average probability of token being routed to expert $i$
 
 The picture shows what expert (for each color) is involved in the processing of 
 the code snippet below (a more or less uniform distribution of colors)
