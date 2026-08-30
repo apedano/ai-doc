@@ -472,3 +472,108 @@ NOTE: $T=0$ would make the sampling of the probabilities deterministic
 
 ## Prompting strategies
 
+The input of a LLM is measured in terms is <span style="color:#FF0000">**number of tokens**</span>
+
+```mermaid
+flowchart LR
+    classDef input fill: none, stroke: none, color:#155724;
+    classDef llm fill: #d4edda, stroke: #28a745, color:#155724;
+    
+    I[Is the Teddy Bear cute?<br>]:::input --> LLM:::llm
+    LLM --> O[Yes]:::input
+    %% Note element
+    n1>"Context length</br>Context size</br>Window size"] 
+    style n1 fill:#ff9,stroke:#333,stroke-width:1px,color:#000
+    I -.- n1
+```
+
+### [Context rot](https://www.trychroma.com/research/context-rot)
+
+We now have LLM models (GPT) that can handle <u>up to tens of hundreds of input tokens in a single pass</u>.
+The risk with such large numbers is what is called <span style="color:#FF0000">**context rot**</span>.
+
+The test used in the article is called <span style="color:#FF0000">**needle in the haystack**</span>: the answer to the question in the input is buried 
+in larger and larger context windows. 
+![needle_haystack.png](img%2Fneedle_haystack.png)
+
+Then the performance of the model to retrieve the answer is retrieved. 
+
+> The conclusion is that the retrieval capability decreases with increasing context lengths.
+
+This is due to the presence of <u>distractors</u> (noise) confusing the model in retrieving the answer.
+
+### Structuring the input
+
+There is a mental model to structure the input to the model to optimize efficiency and effectivness:
+
+![prompt_structure.png](img%2Fprompt_structure.png)
+
+* <u>context</u>: we give the model all the knowledge needed to understand the problem
+* <u>instructions</u>: clear explanation of what we want to achieve
+* <u>input</u>: additional input to the problem
+* <u>constraints</u>: how the output should be limited
+
+## ICL In-Context Learning
+
+> This is a way to steer the output of LLMs without training the model (tuning the weights with backpropagation)
+
+![icl_technics.png](img%2Ficl_technics.png)
+
+In the <u>zero-shot</u> we only give the model the input query without any example. 
+In <u>few-shot</u> we give some examples of input/output couples, including the input query but it 
+requires effort, increase the latency of the model and its computation.
+
+>In modern models, it's seen that wel structured input tends to produce even better reasoning results than the
+few-shots approach, because it does not limit the possibilities of the model generation/reasoning
+
+## Chain of thoughts
+
+Models can be <span style="color:#FF0000">**fine-tuned on datasets containing problems and explanations**</span>, teaching them to produce structured reasoning.
+
+> So, for input query requiring more reasoning, the model can decompose the query into small problesm and produce the logical step to reach the answer
+
+Each logical step is <u>given as additional context to the transformer</u> to contribute to the response generation
+
+The model generates one token at the time and the additional token is given to the transformer as input
+
+Example
+```text
+What is 17 × 24?
+```
+
+With CoT the model could produce
+
+```text
+17 × 20 = 340
+17 × 4 = 68
+340 + 68 = 408
+Therefore, the answer is 408.
+```
+
+The generation process is then
+
+```text
+Question
+   │
+   ▼
+Transformer
+   │
+   ├── "17"
+   ▼
+Transformer + "17"
+   │
+   ├── "×"
+   ▼
+Transformer + "17 ×"
+   │
+   ├── "20"
+   ▼
+...
+   │
+   ▼
+"Therefore, the answer is 408."
+```
+
+> CoT converts some of the reasoning problem into a sequence of token-generation steps.
+
+> More token consumption, more latency. 
