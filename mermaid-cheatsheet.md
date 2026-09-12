@@ -152,9 +152,9 @@ Apply inline CSS properties directly to specific nodes.
 ```mermaid
 flowchart LR
     A[Start] --> B(Process) --> C{Success?}
-    style A fill: #4CAF50, stroke: #2E7D32, stroke-width: 2px, color: #fff
-    style B fill: #2196F3, stroke: #1565C0, stroke-width: 2px, color: #fff
-    style C fill: #FF9800, stroke: #E65100, stroke-width: 2px, color: #fff
+    style A fill:#4CAF50, stroke: #2E7D32, stroke-width: 2px, color: #fff
+    style B fill:#2196F3, stroke: #1565C0, stroke-width: 2px, color: #fff
+    style C fill:#FF9800, stroke: #E65100, stroke-width: 2px, color: #fff
 
 ```
 
@@ -164,9 +164,9 @@ Define reusable style templates for multi-node styling.
 
 ```mermaid
 flowchart LR
-    classDef success fill: #d4edda, stroke: #28a745, color: #155724;
-    classDef danger fill: #f8d7da, stroke: #dc3545, color: #721c24;
-    classDef warning fill: #fff3cd, stroke: #ffc107, color: #856404;
+    classDef success fill:#d4edda, stroke: #28a745, color: #155724;
+    classDef danger fill:#f8d7da, stroke: #dc3545, color: #721c24;
+    classDef warning fill:#fff3cd, stroke: #ffc107, color: #856404;
     Node1[Passed]:::success --> Node2[Warning State]:::warning
     Node2 --> Node3[Critical Fail]:::danger
 
@@ -210,10 +210,10 @@ flowchart TD
 ```mermaid
 flowchart TD
 %% Global Class Definitions
-    classDef startEnd fill: #eceff1, stroke: #455a64, stroke-width: 2px, color:#263238;
-    classDef process fill: #e3f2fd, stroke: #1e88e5, stroke-width: 2px, color:#0d47a1;
-    classDef decision fill: #fff8e1, stroke: #ffa000, stroke-width: 2px, color:#ff6f00;
-    classDef error fill: #ffebee, stroke: #e53935, stroke-width: 2px, color:#b71c1c;
+    classDef startEnd fill:#eceff1, stroke: #455a64, stroke-width: 2px, color:#263238;
+    classDef process fill:#e3f2fd, stroke: #1e88e5, stroke-width: 2px, color:#0d47a1;
+    classDef decision fill:#fff8e1, stroke: #ffa000, stroke-width: 2px, color:#ff6f00;
+    classDef error fill:#ffebee, stroke: #e53935, stroke-width: 2px, color:#b71c1c;
     Start([User Initiates Order]):::startEnd --> AuthCheck{Is User Logged In?}:::decision
     AuthCheck -- No --> PromptLogin[Redirect to Login Page]:::process
     PromptLogin --> AuthCheck

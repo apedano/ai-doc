@@ -23,8 +23,8 @@ Despite <u>**BERT which is a encoder-only transformer based model**</u>.
 
 ```mermaid
 flowchart LR
-    classDef input fill: none, stroke: none;
-    classDef danger fill: #008080, stroke: #008000, color: #FFA500;
+    classDef input fill:none, stroke: none;
+    classDef danger fill:#008080, stroke: #008000, color: #FFA500;
     Node1[x]:::input --> Node2[BIG MODEL]:::danger
     Node2 --> Node3[y^]:::input
 ```
@@ -41,8 +41,8 @@ need by the complete model
 
 ```mermaid
 flowchart LR
-    classDef input fill: none, stroke: none;
-    classDef danger fill: #008080, stroke: #008000, color: #FFA500;
+    classDef input fill:none, stroke: none;
+    classDef danger fill:#008080, stroke: #008000, color: #FFA500;
     Node1[x]:::input --> Node2[BIG MODEL subpart]:::danger
     Node2 --> Node3[y^]:::input
 ```
@@ -99,9 +99,9 @@ Normal Encoder only transformer
 ```mermaid
 flowchart LR
     classDef noDecoration fill: none, stroke: none;
-    classDef attention fill: #008080, stroke: #008000, color: #FFA500;
-    classDef an fill: #FFFACD, stroke: #FFD700, color: #FF8C00;
-    classDef ffn fill: #4682B4, stroke: #1E90FF, color: #AFEEEE;
+    classDef attention fill:#008080, stroke: #008000, color: #FFA500;
+    classDef an fill:#FFFACD, stroke: #FFD700, color:#FF8C00;
+    classDef ffn fill:#4682B4, stroke: #1E90FF, color:#AFEEEE;
     token[tokens]:::noDecoration --> MMHA
 
 subgraph Trans1 [Decoder Transformer Layer]
@@ -125,10 +125,10 @@ Transformer with MoE
 ```mermaid
 flowchart LR
     classDef noDecoration fill: none, stroke: none;
-    classDef attention fill: #008080, stroke: #008000, color: #FFA500;
-    classDef an fill: #FFFACD, stroke: #FFD700, color: #FF8C00;
-    classDef router fill: #f09493, stroke: #ef5554, color: #fefefe;
-    classDef expert fill: #1d5bdc, stroke: #171721, color: #fefefe;
+    classDef attention fill:#008080, stroke: #008000, color: #FFA500;
+    classDef an fill:#FFFACD, stroke: #FFD700, color: #FF8C00;
+    classDef router fill:#f09493, stroke: #ef5554, color: #fefefe;
+    classDef expert fill:#1d5bdc, stroke: #171721, color: #fefefe;
     token[tokens]:::noDecoration --> MMHA
 
 subgraph Trans1 [Decoder Transformer Layer]
@@ -472,6 +472,273 @@ NOTE: $T=0$ would make the sampling of the probabilities deterministic
 
 ## Prompting strategies
 
+### CoT - Chain of thought
+
+In LLMs, chain-of-thought (CoT) refers to generating intermediate reasoning steps between the problem and the final answer.
+
+Example:
+
+Normal answer
+
+```text
+Question: If a train travels 60 km/h for 2.5 hours, how far does it travel?
+Answer: 150 km.
+```
+
+With CoT style answer
+
+```text
+Speed = 60 km/h
+Time = 2.5 h
+Distance = speed × time = 60 × 2.5 = 150 km
+Answer: 150 km
+```
+
+>The LLM is still fundamentally predicting tokens one after another. 
+> Chain-of-thought <span style="color:red">**doesn't introduce a special reasoning algorithm into the Transformer**</span>.
+ 
+In order to answer a question, CoT generates the next token of the logical steps to the solution, the generated token enters
+the context again with the idea that it is closer to the solution and makes the reasoning more straightforward.
+
+For instance, the answer to the question
+
+```text
+What is 17 × 24?
+```
+
+could be directly `408` or, with the CoT be like
+
+```text
+17 × 20 = 340
+17 × 4 = 68
+340 + 68 = 408
+Therefore, the answer is 408.
+```
+
+The process would be then
+
+```text
+Question
+   │
+   ▼
+Transformer
+   │
+   ├── "17"
+   ▼
+Transformer + "17"
+   │
+   ├── "×"
+   ▼
+Transformer + "17 ×"
+   │
+   ├── "20"
+   ▼
+...
+   │
+   ▼
+"Therefore, the answer is 408."
+```
+
+> The key insight is that the intermediate tokens become additional computational workspace.
+
+> CoT converts some of the reasoning problem into a sequence of token-generation steps.
+
+This way we can see the logical step of the solution, that is not the way the transformer inference internally works (activations, sel attentions etc..)
+
+> the **drawback** is more latency and tokens cost
+
+### Self-consistency
+
+This is applied over CoT: 
+
+> * the model produces several CoT answers (reasoning paths) to the same questions in parallel
+> * the final answer correctness is statistically evaluated
+
+Question: `A shirt costs €80 and is discounted by 25%. What is the new price?`
+
+```text
+                 ┌── Reasoning path 1 ──→ €60
+                 │
+Question ────────┼── Reasoning path 2 ──→ €63
+                 │
+                 ├── Reasoning path 3 ──→ €60
+                 │
+                 ├── Reasoning path 4 ──→ €65
+                 │
+                 └── Reasoning path 5 ──→ €60
+                 │
+                 └── Reasoning path 6 ──→ €60
+                              │
+                              ▼
+                       majority vote
+                              │
+                              ▼
+                            €60
+```
+
+Here, even though reasoning paths might be the same, we are interested in the result, because the LLM produces 
+tokens with a probability and this can lead to different paths and answers
+
+> The problem of extracting the final answer from the output remains (regex, ask LLM to answer in the last token...), train other LLM to extract the answer
+
+> Trade off between performance and costs
+
+## Inference optimisations
+
+* What redundancy, memory to improve efficiency
+* what approximations trade-offs are acceptable to improve efficiency
+
+## Optimization - $K,V$ caching
+
+The transformer uses a <span style="color:red">**masked self-attention layer**</span>, that means that self-attention 
+can only attend previous tokens in the sequence
+
+```text
+             The   cat   sat
+The           ✓     ✗     ✗
+cat           ✓     ✓     ✗
+sat           ✓     ✓     ✓
+```
+
+since the attention is $Attention(Q,K,V)=softmax(\frac{QK^\mathsf{T}+M}{\sqrt{d_k}})V$ 
+
+with $Q=XW_Q$, $K=XW_K$ and $V=XW_V$.
+
+We want to compute the self-attention for the token next to the `The cat sat`
+
+so we need $Q_{new}K^\mathsf{T}$
+
+but the key matrix is just the postposition of 
+
+$$K=
+\begin{bmatrix}
+K_{The}  \\
+K_{cat}  \\
+K_{sat}  \\
+\end{bmatrix}
+$$
+
+> The crucial observation is that these three keys have already been computed.
+
+> <u>Because of causal masking</u>, the new token cannot affect the representations of the old tokens,
+> so we can cache all the key matrices for the computation of the new 
+
+The same goes for the $V$ value matrix
+
+## Sharing attention heads
+
+As seen in  [transformer_components.md](../2-Tranformers%20based%20models/transformer_components.md#sharing-attention-head)
+
+## Speculative decoding
+
+> Instead of asking the large model to generate one token at a time, let a cheap model propose several tokens, then use one large-model pass to verify all of them.
+
+With normal LLMs, if we ask `Waht is the capital of France`, we would get the answer 
+
+```text
+What is the capital of France?
+                    ↓
+              Large LLM
+                    ↓
+                   "The"
+                    ↓
+              Large LLM
+                    ↓
+                 "capital"
+                    ↓
+              Large LLM
+                    ↓
+                  "is"
+                    ↓
+              Large LLM
+                    ↓
+                 "Paris"
+```
+
+The generation is serial, only the training can be parallelized. Eeach token is a forward pass through the LLM transformer 
+
+$x_1 \rightarrow x_2 \rightarrow \dots \rightarrow x_n$
+
+Speculative encoding uses two LLMs
+
+* <span style="color:red">**Draft LLM**</span>: small model used to generate the sequence of response tokens sequentially
+* <span style="color:red">**Target LLM**</span>: large LLM to estimate probabilities of the generated sequence of tokens (It checks whether the proposed tokens are consistent with what it would generate.).
+
+```text
+                  Draft model
+                       │
+                       ▼
+              proposes several tokens
+                       │
+                       ▼
+          The capital of France is Paris
+                       │
+                       ▼
+                 Large model
+                  verifies them
+```
+
+The idea is to pass the entire answer to the target model, which, 
+using the mask self attention layers, will attend to all previous tokens as hidden state, in the generation of the next one.
+
+### Validation rule
+
+There is a more precise acceptance rule that makes speculative decoding preserve the target model's distribution.
+
+Let:
+
+* $q(x)$ = draft model probability
+* $p(x)$ = target model probability
+
+$$P=min\left(1,\frac{p(x)}{q(x)}\right)$$
+
+so if a token has $q(x_i)=0.5$ and $q(x_i)=0.8$
+
+the $P(x_i)=min\left(1,\frac{0.8}{0.5}\right)=1$ we accept the token because the target model increased the probability
+ 
+if we have $q(x_i)=0.5$ and $q(x_i)=0.25$
+
+the $P(x_i)=min\left(1,\frac{0.25}{0.5}\right)=0.5$ so we accept the token with probability 0.5 or, otherwise, we take the token from the target LLM
+
+### Example
+
+* Current context: `The capital of France`
+* Next <u>Draft LLM</u> generated tokens: `is`, `Paris`, `and`, `it`
+* The <u>target LLM</u> receives: `The capital of France | is | Paris | and | it`
+* The decoder-only target LLM produces a hidden state for every previous position (because of causal masking) 
+
+```text
+position                    target predicts
+
+The                         P(next token | The)
+capital                     P(next token | The capital)
+of                          P(next token | The capital of)
+France                      P(next token | The capital of France)
+is                           P(next token | The capital of France is)
+Paris                        P(next token | ... Paris)
+and                          P(next token | ... and)
+it                           P(next token | ... it)
+```
+So we can compare the probability of the tokens generated by the draft LLM
+
+> The big advantage is that we do multiple passes for the token generation with a small (faster) LLM and the validation with <span style="color:red">**one pass only of the**</span> 
+> <span style="color:red">**target LLM**</span>
+
+### MTP - Multi Token Prediction
+
+We have seen that with speculative prediction a draft LLM is used to predict multiple tokens sequencally and a target LLM
+validates the prodictions in one inference pass.
+
+> The idea behind MTP is to have the draft LLM embedded in the target LLM
+
+
+The model has multiple prediction heads concatenating the output from the previous head to increase the number
+of predicted tokens per pass.
+
+
+
+
+![mtp.gif](img/mtp.gif)
 The input of a LLM is measured in terms is <span style="color:#FF0000">**number of tokens**</span>
 
 ```mermaid

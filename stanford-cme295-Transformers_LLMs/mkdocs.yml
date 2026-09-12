@@ -69,6 +69,8 @@ nav:
       - 2-Tranformers based models/bert_deep_dive.md
   - Transformers and Large Language Models:
       - 3-Transformers and Large Language Models/llm_overview.md
+  - Training:
+      - 4-LLM training/index.md
 
 
 
