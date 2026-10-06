@@ -1,0 +1,2161 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="from the playlist https://youtube.com/playlist?list=PLoROMvodv4rOCXd21gf0CF4xr35yINeOy&si=ZqpJ1ay1n2Y_Qs1d">
+      
+      
+        <meta name="author" content="Alessandro">
+      
+      
+      
+        <link rel="prev" href="../3-Transformers%20and%20Large%20Language%20Models/llm_overview/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>LLM training - Stanford CME295 Transformers & LLMs | Autumn 2025</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#llm-training" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Stanford CME295 Transformers &amp; LLMs | Autumn 2025" class="md-header__button md-logo" aria-label="Stanford CME295 Transformers & LLMs | Autumn 2025" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Stanford CME295 Transformers & LLMs | Autumn 2025
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              LLM training
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Stanford CME295 Transformers &amp; LLMs | Autumn 2025" class="md-nav__button md-logo" aria-label="Stanford CME295 Transformers & LLMs | Autumn 2025" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Stanford CME295 Transformers & LLMs | Autumn 2025
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Course playlist
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NLP overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    NLP overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1-NLP%20overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    NLP Natural Language Processing overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transformers based models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Transformers based models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2-Tranformers%20based%20models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transformers and attention mechanisms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2-Tranformers%20based%20models/attention_layer_example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cross-attention: a numeric example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2-Tranformers%20based%20models/transformer_components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transformer based models
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2-Tranformers%20based%20models/transformer_example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transformer Encoder Block — Multi-Head Self-Attention Walkthrough
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2-Tranformers%20based%20models/Rope_example/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RoPE Rotary Position Embedding example
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2-Tranformers%20based%20models/bert_deep_dive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    BERT - Bidirectional Encoder Representations from Transformers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Transformers and Large Language Models
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Transformers and Large Language Models
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3-Transformers%20and%20Large%20Language%20Models/llm_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLMs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Training
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM training
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM training
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#training-data-for-pre-trained-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training data for pre-trained models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notation-flop-flops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notation FLOP, FLOPS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chinchilla-law" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chinchilla law
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-cutoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge cutoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-in-decoder-only-llms-adam-optimizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training in decoder only LLMs - Adam optimizer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Training in decoder only LLMs - Adam optimizer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-traditional-sgd-is-not-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The traditional SGD is not used
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-adam-optimizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Adam optimizer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-adamw-optimizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The AdamW optimizer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem-of-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem of memory
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The problem of memory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-parallelism-zero-zero-rerundandcy-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data parallelism - ZeRO (Zero Rerundandcy Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-parallelism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model parallelism
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optizimation-via-flash-attention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optizimation via Flash Attention
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optizimation via Flash Attention">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-internal-architecture-of-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The internal architecture of GPU
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#computation-of-self-attention-with-no-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Computation of self-attention with no optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flasf-self-attention-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flasf self attention 1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Flasf self attention 1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#softmax-computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Softmax computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inline-softmax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inline softmax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#numeric-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Numeric example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-inline-softmax-in-the-flash-self-attention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The inline softmax in the flash self attention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flash-self-attention-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flash self attention 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quantization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quantization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#floating-point-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Floating point representation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-precision-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixed-precision training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supervised-fine-tuning-sft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supervised fine-tuning SFT
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supervised fine-tuning SFT">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-training-data-for-instruction-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The training data for instruction tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-target-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The target object
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-efficient-fine-tuning-with-lora-low-rank-adaptation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter-efficient fine-tuning with LoRA (Low Rank Adaptation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameter-efficient fine-tuning with LoRA (Low Rank Adaptation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-lora-applies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where LORA applies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quantization_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#training-data-for-pre-trained-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training data for pre-trained models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notation-flop-flops" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notation FLOP, FLOPS
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chinchilla-law" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Chinchilla law
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#knowledge-cutoff" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Knowledge cutoff
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-in-decoder-only-llms-adam-optimizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training in decoder only LLMs - Adam optimizer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Training in decoder only LLMs - Adam optimizer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-traditional-sgd-is-not-used" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The traditional SGD is not used
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-adam-optimizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Adam optimizer
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-adamw-optimizer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The AdamW optimizer
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-problem-of-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem of memory
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The problem of memory">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-parallelism-zero-zero-rerundandcy-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Data parallelism - ZeRO (Zero Rerundandcy Optimization)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#model-parallelism" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Model parallelism
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#optizimation-via-flash-attention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optizimation via Flash Attention
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Optizimation via Flash Attention">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-internal-architecture-of-gpu" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The internal architecture of GPU
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#computation-of-self-attention-with-no-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Computation of self-attention with no optimization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flasf-self-attention-1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flasf self attention 1
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Flasf self attention 1">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#softmax-computation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Softmax computation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#inline-softmax" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inline softmax
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#numeric-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Numeric example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-inline-softmax-in-the-flash-self-attention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The inline softmax in the flash self attention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flash-self-attention-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Flash self attention 2
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quantization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantization
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quantization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#floating-point-representation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Floating point representation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mixed-precision-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mixed-precision training
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supervised-fine-tuning-sft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supervised fine-tuning SFT
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Supervised fine-tuning SFT">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-training-data-for-instruction-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The training data for instruction tuning
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-target-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The target object
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-efficient-fine-tuning-with-lora-low-rank-adaptation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameter-efficient fine-tuning with LoRA (Low Rank Adaptation)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parameter-efficient fine-tuning with LoRA (Low Rank Adaptation)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#where-lora-applies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where LORA applies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quantization_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quantization
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="llm-training">LLM training<a class="headerlink" href="#llm-training" title="Permanent link">&para;</a></h1>
+<p>The traditional way of training language model was to train on a specific task</p>
+<p>Training language models is highly expensive, so the idea is to use a pre-trained model and fine tune it for the
+specific task</p>
+<pre class="mermaid"><code>flowchart LR
+    classDef success fill: #d4edda, stroke: #28a745, color: #155724;
+    classDef danger fill: #f8d7da, stroke: #dc3545, color: #721c24;
+    classDef warning fill: #fff3cd, stroke: #ffc107, color: #856404;
+    classDef blue fill: #6497b1, stroke: #03396c, color: #011f4b;
+    Node1[Spam detection]:::success
+    Node2[Sentiment extraction]:::warning
+    Node3[Translation model]:::danger
+    Node4[Pre-trained LLM]:::blue -.-&gt; Node1
+    Node4[Pre-trained LLM]:::blue -.-&gt; Node2
+    Node4[Pre-trained LLM]:::blue -.-&gt; Node3
+</code></pre>
+<p>This is what BERT does as explained here: <a href="../2-Tranformers%20based%20models/bert_deep_dive/">bert_deep_dive.md</a></p>
+<blockquote>
+<p>So the pretrained model is trained with (MLM or NSP) to learn the "basics" of the target language. Then the same model
+is trained with the specific task trianing set</p>
+<p>The pre-training is <u>always</u> to predict the next token.</p>
+</blockquote>
+<h2 id="training-data-for-pre-trained-models">Training data for pre-trained models<a class="headerlink" href="#training-data-for-pre-trained-models" title="Permanent link">&para;</a></h2>
+<ul>
+<li>natural language<ul>
+<li>Common crawl (https://commoncrawl.org/) - Over 300 billion pages spanning 19 years.</li>
+<li>Wikipedia</li>
+</ul>
+</li>
+<li>Code<ul>
+<li>Github</li>
+<li>StackOverflow</li>
+</ul>
+</li>
+</ul>
+<p>Examples are:</p>
+<ul>
+<li>GPT-3 trained on a training set of 300Bi of tokens</li>
+<li>Llama 3 15 Trilions</li>
+</ul>
+<h2 id="notation-flop-flops">Notation FLOP, FLOPS<a class="headerlink" href="#notation-flop-flops" title="Permanent link">&para;</a></h2>
+<p><img alt="flop.png" src="img/flop.png" /></p>
+<p><img alt="flops.png" src="img/flops.png" /></p>
+<h2 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h2>
+<p>How the model performance evolves as function of the model size and the training size</p>
+<p><img alt="performance.png" src="img/performance.png" /></p>
+<p>The following picture shows that for a certain amount of input tokens on the x-axis, a bigger model (the colors towards
+yellow)
+produce less loss, therefore better performance</p>
+<p><img alt="performance_per_size.png" src="img/performance_per_size.png" /></p>
+<h3 id="chinchilla-law">Chinchilla law<a class="headerlink" href="#chinchilla-law" title="Permanent link">&para;</a></h3>
+<p>Based on a fix amount of compute (FLOPS) what are the ideal model size and training set size.</p>
+<p><img alt="chichilla_law_1.png" src="img/chichilla_law_1.png" /></p>
+<p>The coloured lines are per compute size.</p>
+<p><img alt="chichilla_law_1.png" src="img/chichilla_law_1.png" /></p>
+<p>As a rule of thumbs, the ideal sizes are <u>training set size 20 times the model size</u>.</p>
+<h3 id="knowledge-cutoff">Knowledge cutoff<a class="headerlink" href="#knowledge-cutoff" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>The knowledge of the model is updated up to the time of the update time of the training data provided.</p>
+</blockquote>
+<p>This means that if the question is about information after that date the model can retrieve that info from
+external sources</p>
+<pre class="mermaid"><code>flowchart LR
+    classDef success fill: #d4edda, stroke: #28a745, color: #155724;
+    classDef danger fill: #f8d7da, stroke: #dc3545, color: #721c24;
+    classDef warning fill: #fff3cd, stroke: #ffc107, color: #856404;
+    classDef blue fill: #6497b1, stroke: #03396c, color: #011f4b;
+    Node1[Cutoff knowledge]:::success
+    Node2[Extrarnal source - Web search]:::warning
+    Node4[LLM]:::blue -.-&gt; Node1
+    Node4[LLM]:::blue -.-&gt; Node2
+</code></pre>
+<p>It is hard to add new knowledge to an already pre-trained model, because the weights are already determined and are
+not changed at inference time.</p>
+<p>The risk is to introduce <span style="color:#FF0000"><strong>plagiarism</strong></span>, the tendency of copying parts of answers
+from external sources and not
+as part of elaboration.</p>
+<h2 id="training-in-decoder-only-llms-adam-optimizer">Training in decoder only LLMs - Adam optimizer<a class="headerlink" href="#training-in-decoder-only-llms-adam-optimizer" title="Permanent link">&para;</a></h2>
+<p>The problem of training decoder-only LLMs models involves updated different type of weights for each transformer layer</p>
+<ul>
+<li>the <u>masked self attention layer</u>: <span class="arithmatex">\(Q=XW_Q\)</span>, <span class="arithmatex">\(K=XW_K\)</span>,<span class="arithmatex">\(V=XW_V\)</span> so that we
+  have <span class="arithmatex">\(Attention(Q,K,V)=softmax(\frac{QK^\mathsf{T}+M}{\sqrt{d_k}})V\)</span></li>
+<li>the <u>output</u> <span class="arithmatex">\(O=Attention(Q,K,V)W_O\)</span></li>
+<li>the FFN(x) with the typical two projections <span class="arithmatex">\(n \rightarrow m \rightarrow n\)</span>: <span class="arithmatex">\(\sigma(xW_1+b_1)W_2+b_2\)</span></li>
+<li>token embeddings (RoPE)</li>
+<li>Layer normalizations</li>
+<li>MoE (if present)</li>
+</ul>
+<blockquote>
+<p>The training compares the next token probability <span class="arithmatex">\(P(mat∣The cat is sitting on the)\)</span> with the target to calculate the
+loss</p>
+</blockquote>
+<h3 id="the-traditional-sgd-is-not-used">The traditional SGD is not used<a class="headerlink" href="#the-traditional-sgd-is-not-used" title="Permanent link">&para;</a></h3>
+<p>The Stochastic Gradient Descent</p>
+<p><span class="arithmatex">\(\Theta_{t+1}=\Theta_{t}-\eta g_t\)</span> (<span class="arithmatex">\(\eta\)</span> learning rate) (<span class="arithmatex">\(g_t=\nabla_\Theta L_t\)</span>)</p>
+<p>An LLM may have billions of parameters, and different parameters can have very different gradient behavior.</p>
+<p>Adam addresses this by maintaining information about the gradients over time.</p>
+<h3 id="the-adam-optimizer">The Adam optimizer<a class="headerlink" href="#the-adam-optimizer" title="Permanent link">&para;</a></h3>
+<p>For each parameter <span class="arithmatex">\(\Theta\)</span>, Adam memorizes two values</p>
+<ul>
+<li><span style="color:#FF0000"><strong>First moment</strong></span>: a exponentially moving average of the gradient (it provides
+  momentum.)</li>
+</ul>
+<div class="arithmatex">\[m_t=\beta_1m_{t-1}(1-\beta_1)g_{t}\]</div>
+<ul>
+<li><span style="color:#FF0000"><strong>Second moment</strong></span>: the variance of recent gradients</li>
+</ul>
+<div class="arithmatex">\[v_t=\beta_2v_{t-1}(1-\beta_2)g^2_{t}\]</div>
+<p>Considering that <span class="arithmatex">\(m_0=0\)</span> and <span class="arithmatex">\(v_0=0\)</span>, the first iterations are biased towards zero.
+For this reason is is used a corrected form of the two moments with what is called <span style="color:red"><strong>bias
+correction</strong></span></p>
+<blockquote>
+<div class="arithmatex">\[\hat m_t=\frac{m_t}{1-\beta _1^t}\]</div>
+</blockquote>
+<p>and</p>
+<blockquote>
+<div class="arithmatex">\[\hat v_t=\frac{v_t}{1-\beta _2^t}\]</div>
+</blockquote>
+<p>So the <span style="color:red"><strong>parameter update</strong></span> is</p>
+<blockquote>
+<div class="arithmatex">\[\Theta_{t+1}=\Theta_{t}+\eta\frac{\hat m_t}{\sqrt{\hat v_t}+\epsilon}\]</div>
+</blockquote>
+<p>where <span class="arithmatex">\(\eta\)</span> is the learning rate and <span class="arithmatex">\(\epsilon\)</span> is a correction parameter $ \sim10^{-8}$</p>
+<blockquote>
+<p>Adam allows updates of different orders of magnitudes of parameters in a LLM because it is based on the
+historical values of the gradients for those parameters.</p>
+</blockquote>
+<p>Conceptually:</p>
+<div class="arithmatex">\[ \frac{\text{gradient}} {\sqrt{\text{historical gradient}^2}} \]</div>
+<p>Therefore, parameters with very different gradient scales can receive appropriately scaled updates.</p>
+<p>This is particularly useful in huge neural networks containing many different types of parameters.</p>
+<h3 id="the-adamw-optimizer">The AdamW optimizer<a class="headerlink" href="#the-adamw-optimizer" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>AdamW is generally more relevant than the original Adam. It decouples the weight decay parameter <span class="arithmatex">\(\lambda\)</span></p>
+</blockquote>
+<p>Cnceptually:</p>
+<blockquote>
+<div class="arithmatex">\[ \theta_{t+1} = \theta_t - \eta \frac{\hat m_t} {\sqrt{\hat v_t}+\epsilon} - \eta\lambda\theta_t \]</div>
+</blockquote>
+<p>where <span class="arithmatex">\(\lambda\)</span> is the weight-decay coefficient.</p>
+<p>So the update becomes</p>
+<pre class="mermaid"><code>flowchart LR
+    classDef success fill: #d4edda, stroke: #28a745, color: #155724;
+    classDef danger fill: #f8d7da, stroke: #dc3545, color: #721c24;
+    classDef warning fill: #fff3cd, stroke: #ffc107, color: #856404;
+    classDef blue fill: #6497b1, stroke: #03396c, color: #011f4b;
+    Node1[Forward pass]:::blue --&gt; 
+    Node2[Logits]:::blue --&gt;
+Node3[Cross Entropy loss]:::blue --&gt;
+Node4[Backpropagation]:::blue --&gt;
+Node5[Gradients]:::blue --&gt; AdamW
+subgraph AdamW [AdamW]
+direction TB
+Node6[Momentum m]:::warning --&gt;
+Node7[Second Momentum v]:::warning --&gt;
+Node8[Bias correction]:::warning --&gt;
+Node9[Adaptive step]:::warning --&gt;
+Node10[Weight decay]:::warning
+
+end
+AdamW --&gt; Node11[transformer
+weights
+update]:::blue
+</code></pre>
+<p>The problem with the optimizer is the <span style="color:red"><strong>memory cost</strong></span></p>
+<p>Suppose to have a LLM with :</p>
+<div class="arithmatex">\[ N=7\text{ billion} \]</div>
+<p>For each parameter, Adam maintains</p>
+<ul>
+<li>model parameters</li>
+<li>gradients</li>
+<li>first moment <span class="arithmatex">\(m\)</span></li>
+<li>second moment <span class="arithmatex">\(v\)</span></li>
+</ul>
+<p>So, only the additional moments memory requirement is re approximately:</p>
+<div class="arithmatex">\[ 2\times 7\text{B}\times4\text{ bytes} ≈56 GB \]</div>
+<h2 id="the-problem-of-memory">The problem of memory<a class="headerlink" href="#the-problem-of-memory" title="Permanent link">&para;</a></h2>
+<blockquote>
+<p>During LLM training we need to keep track of the loss gradient for each parameter, including the weight updates
+for optimizer (Adam or AdamW).</p>
+</blockquote>
+<p>For a high end graphic board with <span class="arithmatex">\(\sim 10 GB\)</span> memory.</p>
+<h3 id="data-parallelism-zero-zero-rerundandcy-optimization">Data parallelism - ZeRO (Zero Rerundandcy Optimization)<a class="headerlink" href="#data-parallelism-zero-zero-rerundandcy-optimization" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>the idea is to involve several GPUs in the computing of the backward by <span style="color:red"><strong>dividing data in
+batches and process
+them in replicated instance of the model</strong></span></p>
+</blockquote>
+<p>Cons: gradient calculation based on average of gradients needs forms of aggregation and require communication between
+the model replicas decreasing the overall model performance.</p>
+<p>The intuition is that there is a lot of duplication in all the instances (redundancy) mostly for
+the <span style="color:red"><strong>optimizer state</strong></span> <u>which is
+the most memory consuming part</u></p>
+<blockquote>
+<p><span style="color:red"><strong>ZeRO</strong></span> creates partitions of parameters, grandients and optimizer state across the
+replicas</p>
+</blockquote>
+<p>We go for a setup where the model is copied
+<img alt="zero_duplicate.png" src="img/zero_duplicate.png" /></p>
+<p>to one where data are partitioned</p>
+<table>
+<thead>
+<tr>
+<th>ZeRO-1</th>
+<th>ZeRO-2</th>
+<th>ZeRO-1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img alt="zero_1.png" src="img/zero_1.png" /></td>
+<td><img alt="zero_2.png" src="img/zero_2.png" /></td>
+<td><img alt="zero_3.png" src="img/zero_3.png" /></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Increases communication costs by reduces the memory management</p>
+</blockquote>
+<h2 id="model-parallelism">Model parallelism<a class="headerlink" href="#model-parallelism" title="Permanent link">&para;</a></h2>
+<p><img alt="model_parallelism.png" src="img/model_parallelism.png" /></p>
+<p>Strategies to parallelize the model onto several GPUs</p>
+<ul>
+<li><span style="color:red"><strong>Pipeline parallelism</strong></span>: distribute transformer layers across GPUs</li>
+<li><span style="color:red"><strong>Expert parallelism</strong></span>: distribute the experts in MoE across GPUs</li>
+</ul>
+<h2 id="optizimation-via-flash-attention">Optizimation via Flash Attention<a class="headerlink" href="#optizimation-via-flash-attention" title="Permanent link">&para;</a></h2>
+<h3 id="the-internal-architecture-of-gpu">The internal architecture of GPU<a class="headerlink" href="#the-internal-architecture-of-gpu" title="Permanent link">&para;</a></h3>
+<p>We distinguish two tipes of memory:</p>
+<ul>
+<li><span style="color:red"><strong>HBM</strong></span>: large storage <span class="arithmatex">\(\sim 10 GB\)</span>, <span class="arithmatex">\(v\sim TB/s\)</span></li>
+<li><span style="color:red"><strong>SRAM</strong></span>: small <span class="arithmatex">\(\sim 10 MB\)</span> and fast on-chip memory. Tens times faster than
+  HBM <span class="arithmatex">\(v\sim 10\times TB/s\)</span>.</li>
+</ul>
+<p>So</p>
+<p><span class="arithmatex">\(\text{softmax}(QK^\top / \sqrt{d_k})\)</span></p>
+<h3 id="computation-of-self-attention-with-no-optimization">Computation of self-attention with no optimization<a class="headerlink" href="#computation-of-self-attention-with-no-optimization" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Load <span class="arithmatex">\(Q\)</span> and <span class="arithmatex">\(K\)</span> from <span style="color:blue"><strong>HBM</strong></span> blocks</li>
+<li>Perform the multiplication <span class="arithmatex">\(S=QK^\mathsf{T}\)</span></li>
+<li>Write <span class="arithmatex">\(S\)</span> to <span style="color:blue"><strong>HBM</strong></span></li>
+<li>Load <span class="arithmatex">\(S\)</span> from <span style="color:blue"><strong>HBM</strong></span> blocks</li>
+<li>Perform <span class="arithmatex">\(P=softmax(S)\)</span></li>
+<li>Write <span class="arithmatex">\(P\)</span> to <span style="color:blue"><strong>HBM</strong></span></li>
+<li>Load <span class="arithmatex">\(P\)</span> and <span class="arithmatex">\(V\)</span> from <span style="color:blue"><strong>HBM</strong></span> blocks</li>
+<li>Perform <span class="arithmatex">\(O=PV\)</span></li>
+<li>Write <span class="arithmatex">\(O\)</span> to <span style="color:blue"><strong>HBM</strong></span></li>
+</ol>
+<p>The load and write for such big matrices (<span class="arithmatex">\(Q\)</span> has <span class="arithmatex">\(n\)</span> length of the sequence rows) is the <u>bottleneck</u></p>
+<h3 id="flasf-self-attention-1">Flasf self attention 1<a class="headerlink" href="#flasf-self-attention-1" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>Send "tiles" (subparts) of the matrices to be computed to the SRAM which can perform full end-to-end computation (in
+chip) and send it
+back to HBM</p>
+</blockquote>
+<p>Minimize the reads and writes to the HBM.</p>
+<h4 id="softmax-computation">Softmax computation<a class="headerlink" href="#softmax-computation" title="Permanent link">&para;</a></h4>
+<p>The problem with the tiling is the softmax computation because it is based on the sum of all the exponentials over the
+row
+to calculate the prob distribution.</p>
+<blockquote>
+<p>A naive block-by-block softmax would need the global max in advance, which you don't have until you've seen every
+block.</p>
+</blockquote>
+<p>Softmax over a row <span class="arithmatex">\(x \in \mathbb{R}^n\)</span> is (numerically stable)</p>
+<div class="arithmatex">\[\operatorname{softmax}(x)_i = \frac{e^{x_i - m}}{\sum_{k=1}^n e^{x_k - m}}, \qquad m = \max_k x_k\]</div>
+<h4 id="inline-softmax">Inline softmax<a class="headerlink" href="#inline-softmax" title="Permanent link">&para;</a></h4>
+<p>The fix: keep two running scalars per row — a running max <span class="arithmatex">\(m\)</span> and a running (rescaled) sum <span class="arithmatex">\(l\)</span> — and update them as each
+tile arrives, rescaling on the fly whenever the max changes.</p>
+<p>Initialize:
+$<span class="arithmatex">\(m^{(0)} = -\infty, \qquad l^{(0)} = 0\)</span>$</p>
+<p>For each tile <span class="arithmatex">\(j\)</span> with values <span class="arithmatex">\(x^{(j)}\)</span>:</p>
+<div class="arithmatex">\[m^{(j)} = \max\left(m^{(j-1)},\ \max_i x_i^{(j)}\right)\]</div>
+<div class="arithmatex">\[l^{(j)} = l^{(j-1)} \cdot e^{\,m^{(j-1)} - m^{(j)}} + \sum_i e^{\,x_i^{(j)} - m^{(j)}}\]</div>
+<p>After the final tile <span class="arithmatex">\(T\)</span>, the exact softmax of every element seen so far (regardless of which tile it came from) is:</p>
+<div class="arithmatex">\[\operatorname{softmax}(x_i) = \frac{e^{\,x_i - m^{(T)}}}{l^{(T)}}\]</div>
+<blockquote>
+<p><strong>Why this is exact, not an approximation:</strong> <span class="arithmatex">\(l^{(j)}\)</span> is always maintained
+as <span class="arithmatex">\(\sum_{k \le j} \sum_i e^{x_i^{(k)} - m^{(j)}}\)</span> — the sum of <em>all</em> exponentials seen so far, expressed relative to
+the <em>current</em> max. When the max increases from <span class="arithmatex">\(m^{(j-1)}\)</span> to <span class="arithmatex">\(m^{(j)}\)</span>, every term computed under the old max needs to
+be multiplied by <span class="arithmatex">\(e^{m^{(j-1)} - m^{(j)}}\)</span> to re-express it relative to the new max — that's exactly the rescale term.
+No information is thrown away, and no exponential ever overflows, because every term is computed relative to the max
+seen at that point.</p>
+</blockquote>
+<h4 id="numeric-example">Numeric example<a class="headerlink" href="#numeric-example" title="Permanent link">&para;</a></h4>
+<p>Take <span class="arithmatex">\(x = [3,\ 1,\ 4,\ 1,\ 5,\ 9]\)</span>, processed in tiles of size 2.</p>
+<p><strong>Tile 1: <span class="arithmatex">\([3, 1]\)</span></strong>
+$<span class="arithmatex">\(m^{(1)} = \max(-\infty, 3) = 3\)</span>$
+$<span class="arithmatex">\(l^{(1)} = 0 + \left(e^{3-3} + e^{1-3}\right) = 1 + 0.1353 = 1.1353\)</span>$</p>
+<p><strong>Tile 2: <span class="arithmatex">\([4, 1]\)</span></strong>
+$<span class="arithmatex">\(m^{(2)} = \max(3, 4) = 4\)</span>$
+$<span class="arithmatex">\(l^{(2)} = 1.1353 \cdot e^{3-4} + \left(e^{4-4} + e^{1-4}\right) = 1.1353(0.3679) + (1 + 0.0498) = 0.4178 + 1.0498 = 1.4676\)</span>$</p>
+<p><strong>Tile 3: <span class="arithmatex">\([5, 9]\)</span></strong>
+$<span class="arithmatex">\(m^{(3)} = \max(4, 9) = 9\)</span>$
+$<span class="arithmatex">\(l^{(3)} = 1.4676 \cdot e^{4-9} + \left(e^{5-9} + e^{9-9}\right) = 1.4676(0.006738) + (0.018316 + 1) = 0.009888 + 1.018316 = 1.028204\)</span>$</p>
+<p><strong>Check against the direct computation</strong> (<span class="arithmatex">\(\sum_i e^{x_i - 9}\)</span> over the whole array):
+$<span class="arithmatex">\(e^{-6}+e^{-8}+e^{-5}+e^{-8}+e^{-4}+e^{0} = 0.002479+0.000335+0.006738+0.000335+0.018316+1 = 1.028203\)</span>$</p>
+<p>Matches (up to rounding). Final softmax values, <span class="arithmatex">\(e^{x_i-9}/1.028204\)</span>:</p>
+<table>
+<thead>
+<tr>
+<th><span class="arithmatex">\(x_i\)</span></th>
+<th>3</th>
+<th>1</th>
+<th>4</th>
+<th>1</th>
+<th>5</th>
+<th>9</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>softmax</td>
+<td>0.002411</td>
+<td>0.000326</td>
+<td>0.006552</td>
+<td>0.000326</td>
+<td>0.017811</td>
+<td>0.972571</td>
+</tr>
+</tbody>
+</table>
+<p>(sums to 1.0, as expected)</p>
+<h3 id="the-inline-softmax-in-the-flash-self-attention">The inline softmax in the flash self attention<a class="headerlink" href="#the-inline-softmax-in-the-flash-self-attention" title="Permanent link">&para;</a></h3>
+<p>For each tile <span class="arithmatex">\(j\)</span> we extract <span class="arithmatex">\(Q^{(j)}\)</span>, <span class="arithmatex">\(K^{(j)}\)</span>, <span class="arithmatex">\(V^{(j)}\)</span> and also a <span class="arithmatex">\(O^{(j)}\)</span> that is at every tile updated with</p>
+<div class="arithmatex">\[O^{(j)} = O^{(j-1)} \cdot e^{\,m^{(j-1)} - m^{(j)}} + \sum_i e^{\,x_i^{(j)} - m^{(j)}} \, V_i^{(j)}\]</div>
+<p>The algorithm is to get the complete <span class="arithmatex">\(O \in \mathbb{R}^{N,d_m}\)</span> with (N dimension of the input sequence, <span class="arithmatex">\(d_m\)</span> dimension of the model)</p>
+<p><img alt="inline_softmax.png" src="img/inline_softmax.png" /></p>
+<ul>
+<li><strong>outer loop over row blocks</strong>: suppose to have <span class="arithmatex">\(B_r\)</span> number of blocks, queries at the time</li>
+<li><strong>inner loop over column tiles</strong>: <span class="arithmatex">\(B_c\)</span> kys/values at a time computed in the <span style="color:green"><strong>SRAM</strong></span> in the end-to-end manner</li>
+<li>After the last column tile, divide that block's accumulated numerator by its <span class="arithmatex">\(l\)</span>(broadcast across the <span class="arithmatex">\(d_k\)</span>
+columns) — this is the only normalization step, done once per row block.</li>
+</ul>
+<div class="arithmatex">\[O^{(\text{final})} = O^{(T)} / l^{(T)}\]</div>
+<ul>
+<li>Write that finished <span class="arithmatex">\((B_r,d_v)\)</span> chunk into rows <span class="arithmatex">\([iB_r:(i+1)B_r]\)</span> of <span class="arithmatex">\(O\)</span>.</li>
+<li>Once every row block has been processed, <span class="arithmatex">\(O\)</span> is complete </li>
+</ul>
+<blockquote>
+<p>FlashAttention compute exact (not approximate) attention output while only ever holding one tile of <span class="arithmatex">\(Q\)</span>, <span class="arithmatex">\(K\)</span>, <span class="arithmatex">\(V\)</span> 
+and three small running accumulators (<span class="arithmatex">\(m\)</span>, <span class="arithmatex">\(l\)</span>, <span class="arithmatex">\(O\)</span>) in fast memory, avoiding the <span class="arithmatex">\(O(n^2)\)</span> materialization of the full attention matrix.</p>
+</blockquote>
+<h3 id="flash-self-attention-2">Flash self attention 2<a class="headerlink" href="#flash-self-attention-2" title="Permanent link">&para;</a></h3>
+<p>In traditional training we store the activation matrices (at the inner layers) for <span class="arithmatex">\(S\)</span> and <span class="arithmatex">\(P\)</span> to be used in the backward pass for 
+the calculation of the gradient. </p>
+<blockquote>
+<p>Considering that we are now using the fast <span style="color:green"><strong>SRAM</strong></span> for computing, we no longer store the activation matrices in the forward pass,
+we rather recomputed them</p>
+<p>We accept the overhead of more FLOPS operations to save memory requirement</p>
+</blockquote>
+<p><img alt="flash_attention_requirements.png" src="img/flash_attention_requirements.png" /></p>
+<p>We have increased the runtime substantially too.</p>
+<h2 id="quantization">Quantization<a class="headerlink" href="#quantization" title="Permanent link">&para;</a></h2>
+<p>What is the float precision trade-off to balance effectiveness and memory requirement.</p>
+<h3 id="floating-point-representation">Floating point representation<a class="headerlink" href="#floating-point-representation" title="Permanent link">&para;</a></h3>
+<p><img alt="floating_point_representation.jpg" src="img/floating_point_representation.jpg" /></p>
+<div class="arithmatex">\[f=-1^s\cdot 2^{e-127}\cdot(1-\sum_if\cdot2^{i-23}) \]</div>
+<p><img alt="float_precision.png" src="img/float_precision.png" /></p>
+<p><img alt="flops_performance.png" src="img/flops_performance.png" /></p>
+<p><code>FP32</code> requires half of memory compared to <code>FP64</code>, but it has more precision error and is faster (67 teraFLOPS instead of 34 teraFLOPS).</p>
+<h3 id="mixed-precision-training">Mixed-precision training<a class="headerlink" href="#mixed-precision-training" title="Permanent link">&para;</a></h3>
+<p>The idea is</p>
+<ul>
+<li><strong>forward pass</strong>: <u>use low precision</u> <span class="arithmatex">\(x_{FP32} \rightarrow f \rightarrow \hat y_{FP16}\)</span></li>
+<li><strong>backward pass</strong>: <u>use low precision</u> <span class="arithmatex">\(x_{FP32} \rightarrow \nabla f_{FP16} \rightarrow \hat y_{FP16}\)</span></li>
+<li><strong>weight update</strong>: <u>keep weight in high precision</u> <span class="arithmatex">\(x_{FP32} \rightarrow f_{FP32} \rightarrow \hat y_{FP16}\)</span></li>
+</ul>
+<p>This has been tested having the best performance optimization with reduced precision.</p>
+<p>The idea justifying the lower precision for estimation and data is that input data are intrinsically noisy so
+the amount of information lost with low precision is not much relevant.</p>
+<p>It is important to keep the weights with high precision to have stable processing</p>
+<h2 id="supervised-fine-tuning-sft">Supervised fine-tuning SFT<a class="headerlink" href="#supervised-fine-tuning-sft" title="Permanent link">&para;</a></h2>
+<p>We have seen many GPT, including BERT models having the training split in two phases </p>
+<ul>
+<li><span style="color:red"><strong>Pre-training</strong></span>: MLM (Masked Language Model) and NSP (Next Sentence Prediction) to have a general knowledge of the language</li>
+<li><span style="color:red"><strong>Fine tuning</strong></span>: based on the specific task</li>
+</ul>
+<p>So if we just use the pre-trained model we can get the following</p>
+<p><img alt="pre-trained_usage.png" src="img/pre-trained_usage.png" /></p>
+<p>We see here that the model is also based on the <span style="color:red"><strong>next token prediction</strong></span>, based on the network trained with training data that, 
+in this case, might correlate the washing of a teddy bear to the composing material; that's why the 
+answer <u>reflects this association without giving back the answer that a user could expect</u>.</p>
+<p>Fine-tuning specializes the LLM to respond to specific tasks</p>
+<blockquote>
+<p>In SFT we provide the pre-trained LLM with input/output data (<u>SFT data</u>) to update model weights with training 
+to implement the <u>task of interest</u></p>
+</blockquote>
+<h3 id="the-training-data-for-instruction-tuning">The training data for instruction tuning<a class="headerlink" href="#the-training-data-for-instruction-tuning" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>Instruction tuning is the fine-tuning technique finalized to answering complex instructions</p>
+</blockquote>
+<p>For pre-training, we have seen that the training data are huge datasets (wikipedia, dedicated sets of bilions of page)
+to allow the model to derive the language knowledge.</p>
+<p>The training data can be divided into several sub topics, where the training data represent 
+the instruction and a potential expected response from the model.</p>
+<p><img alt="instruction_tuning_data.png" src="img/instruction_tuning_data.png" /></p>
+<h3 id="the-target-object">The target object<a class="headerlink" href="#the-target-object" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Pre-training</strong>: For a decoder-only LLM such as GPT, pre-training is usually self-supervised.</li>
+</ul>
+<p>Given the input <code>The cat is sitting on the</code>, the model training is for the next token, so, in general</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>x₁  x₂  x₃  x₄  ...  xₙ
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a> ↓   ↓   ↓   ↓
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>x₂  x₃  x₄  x₅  ...  xₙ₊₁
+</code></pre></div>
+<blockquote>
+<p>The targets are simply the tokens already present in the training text, shifted by one position.</p>
+<p>"Given everything before this position, what token comes next?"</p>
+<p>The <span style="color:red"><strong>loss</strong></span> is calculated for each new predicted token</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>PRE-TRAINING
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>Huge corpus
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    ↓
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>&quot;The capital of France is Paris...&quot;
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    ↓
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>predict next token
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    ↓
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>learn language + knowledge + patterns
+</code></pre></div>
+<ul>
+<li><span style="color:red"><strong>Supervised fine-tuning</strong></span>: target = desired response</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Instruction:
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>Explain why the sky is blue.
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>Target:
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>The sky appears blue because molecules in Earth&#39;s atmosphere
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>scatter shorter wavelengths of sunlight more strongly...
+</code></pre></div>
+<blockquote>
+<p>Since causal LLMs are always producing a prediction for the next token, here the <span style="color:red"><strong>loss</strong></span> 
+is calculated for the entire model response (so it can be compared to the expected output)</p>
+</blockquote>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>SFT
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Human-designed examples
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>    ↓
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>&quot;Question → desired answer&quot;
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    ↓
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>predict next token of desired answer
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    ↓
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>learn how to respond to instructions
+</code></pre></div>
+<p>A way to generate the examples is to give instructions as input of pre-existing LLMs,
+given the output, validate it with other LLMs or via human validation.</p>
+<p>Subsets of SFT data regard also the model behavior to enforce the model to reject harmful content or
+vulgarities, safety alignment. </p>
+<p>The size is </p>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>SFT data (# examples)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-3</td>
+<td>13k</td>
+</tr>
+<tr>
+<td>Llama 3</td>
+<td>10M</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>SFT data size is usually several order of magnitude lower than the size of the pre-training data set.</p>
+</blockquote>
+<p><img alt="fined_tuned_answer.png" src="img/fined_tuned_answer.png" /></p>
+<h3 id="parameter-efficient-fine-tuning-with-lora-low-rank-adaptation">Parameter-efficient fine-tuning with LoRA (Low Rank Adaptation)<a class="headerlink" href="#parameter-efficient-fine-tuning-with-lora-low-rank-adaptation" title="Permanent link">&para;</a></h3>
+<p><img alt="lora.png" src="img/lora.png" /></p>
+<blockquote>
+<p>LoRA makes easy to train the same pretrained model for different fine-tuning tasks, because we can isolate the 
+fine-tuning trained weights</p>
+</blockquote>
+<p><img alt="lora_applications.png" src="img/lora_applications.png" /></p>
+<h4 id="where-lora-applies">Where LORA applies<a class="headerlink" href="#where-lora-applies" title="Permanent link">&para;</a></h4>
+<p>Even though lora is nowadays applied to both self-attention layer and FFNN layer it has been demonstrated that 
+it gives better performance improvement on the FFNN layer.</p>
+<p><img alt="lora_positioning.png" src="img/lora_positioning.png" /></p>
+<h4 id="quantization_1">Quantization<a class="headerlink" href="#quantization_1" title="Permanent link">&para;</a></h4>
+<p>In order to reduce the memory footpring of LORA, some approaches use float quantization of the pre-trained 
+matrices and the fine-tune matrices <span class="arithmatex">\(A\)</span> and <span class="arithmatex">\(B\)</span> in full precision, including the computation of the matrix operations</p>
+<p><img alt="lora_quantization.png" src="img/lora_quantization.png" /></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+        <script src="https://unpkg.com/mermaid@11/dist/mermaid.min.js"></script>
+      
+        <script src="../javascripts/mermaid.js"></script>
+      
+    
+  </body>
+</html>
