@@ -74,71 +74,175 @@ This process will continue until the final state $s_t$ is reached in case:
 * $s_t$ is a <span style="color:#FF0000">**terminal state**</span>
 * a pre-defined <span style="color:#FF0000">**maximum number of steps**</span> has been reached
 
-### Trajectory
+### Trajectory / Completion
 
 The sequence of actions, states and rewards
 
 ![trajectory.png](img/trajectory.png)
+
+In the LLM world the trajectory is called <span style="color:red">**completion**</span>:
+
+> Given a prompt $x$, a language model generates a <span style="color:red">**completion
+**</span> $y=(y_1, y_2, \dots ,t_T)$ one token at a time
 
 The probability of the trajectory, is calculated by the combination of policy and transformation
 using the chain rule:
 
 ![trajectory_prob.png](img/trajectory_prob.png)
 
-The <span style="color:#FF0000">****</span> or <span style="color:#FF0000">****</span> of the trajectory is the
-sum of all rewards of the trajectory. It is denoted in two versions
+> The same way we have the <span style="color:red">**completion probability**</span>:
+> $$p_{\Theta}(y | x) = \prod_{t=1}^Tp_{\Theta}(y_t|x, y_{\lt t})$$
 
-| Finite horizon not discounted return          | Infinite horizon discounted return                                                                                                                                              | 
-|-----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| total length of the trajectory $T$ is finite  | Infinite trajectory with a <span style="color:#FF0000">**discount factor**</span> $\gamma \in [0,1]  $<br/> The exponent makes the lower time steps contributions more relevant |
-| ![f_h_n_d_return.png](img/f_h_n_d_return.png) | ![i_h_d_return.png](img/i_h_d_return.png)                                                                                                                                       |
+The product of all the probability of the current token geneated at time $t$, given the input and all the
+previous tokens ($\lt t$)
 
-Ways to caluclate the return can be also based on the current state in a per-token
-base ([KL penalties](https://cameronrwolfe.substack.com/p/direct-preference-optimization?open=false#%C2%A7kullback-leibler-kl-divergence))
-or
-[Generalized Advantage Estimation (GAE)](https://cameronrwolfe.substack.com/i/175107358/generalized-advantage-estimation-gae-3)
-where a discount factor is used recursively
+Generating a completion traces one path through a tree of possible continuations.
 
-> <span style="color:#FF0000">**Return based on status $s_t$**</span> 
-> $$G_t=\sum_{i=0}^{\infty}\gamma^ir_{t+i}$$
+### Return / reward function
 
-> <span style="color:#FF0000">**Recursive return**</span>
-> $$G_t=r_t+\gamma G_{t+i}$$
+For reasoning tasks, the **reward function** is often a verifier $R(x,y)$  if the final answer is correct and
+
+$$
+R(x,y)\colon
+\left\{
+\begin{array}{rcl}
+\mathbf{1} & \longrightarrow & \text{correct answer} \\
+\mathbf{0} & \longmapsto & \text{otherwise}
+\end{array}
+\right.
+$$
+
+This setup is often called RL with verifiable rewards (RLVR). Math problems with a known answer and coding tasks with
+unit tests are common examples.
+
+![return.png](img/return.png)
 
 ### The objective function of RL
 
-> The objective function for RL is to <span style="color:#FF0000">**maximize the expected return of the current policy**</span> expressed as 
-> expectation over sampled trajectories, (either as an integral or a discrete probability-weighted sum) over possible trajectories
+#### Expectation as average reward
 
-![expectation_trajectory.png](img/expectation_trajectory.png)
+> Our goal is to find the parameters θ (parameters of LLM) that maximize the expected reward, which we call
+> the <span style="color:red">**objective J(θ)**</span>
+> $$J(\Theta)=\mathbb{E}_{x \sim \mathcal{D},y \sim p_{\Theta}(\cdot| x)}[R(x,y)]$$
 
-The estimation over all possible trajectories is not computationally feasable.
+where
 
-We rather use the <span style="color:#FF0000">**Monte Carlo estimate from N randomly sampled trajectories**</span>
+* $x\sim\mathcal{D}$: a prompt $x$ drawn from a dataset (distribution) $\mathcal{D}$.
+* $y\sim p_\Theta(\cdot\mid x)$: a response $y$ sampled from the model with parameters $\Theta$, given the prompt. The dot means “the distribution over all $y$”.
+$R(x,y)$: a scalar reward for that prompt/response pair (e.g. from a reward model).
+* $J(\Theta)$: the average reward the model earns. Training maximizes it.
 
-$$\hat J(\pi_{\Theta})=\frac{1}{N}\sum_{i=1}^{N}R(\tau_{i}) \text{ where } \tau_{i} \sim \pi_{\Theta} $$
+$$J(\Theta)=\mathbb{E}_{x\sim\mathcal{D},\,y\sim p_\Theta(\cdot\mid x)}[R(x,y)]=\sum_x \mathcal{D}(x)\sum_y p_\Theta(y\mid x)\,R(x,y)$$
 
->The <span style="color:#FF0000">**RL OBJECTIVE**</span> is then the set of parameters for the maximal return (estimated) function
+An expectation is $(probability) × (value)$ summed over outcomes. 
 
-> $$\Theta^* \rightarrow argmax(\hat J(\pi_{\Theta}))$$
+Here the outcomes are pairs $(x,y)$ with probability $\mathcal{D}(x)\,p_\Theta(y\mid x)$.
+
+#### Fix the prompt
+
+We fix the prompt (it is impossible to estimate all possible prompts given to an LLM) <span style="color:red">**$\mathcal{D}(x)=1$**</span>
+
+$$J(\Theta)=\sum_y p_\Theta(y)\,R(y)$$
+
+In general RL, an agent collects a reward after each of many actions, and the objective is the expected total reward
+over an episode, often discounted.
+<u>Generating a completion is an episode where each token is an action and the only reward comes at the end</u>, so the
+total is just $R(y)$
+
+### The policy gradient (gradient with respect policy parameters)
+
+To improve the model, we want to follow the gradient of the objective, $\nabla_\Theta J(\Theta)$  the direction in
+parameter space that most increases the expected reward.
+
+Written out, the objective is a sum over every possible completion:
+
+$$\nabla_{\Theta}(J(\Theta))=\nabla_{\Theta}\sum_y p_{\Theta}(y)R(y)=\sum_y \nabla_{\Theta}p_{\Theta}(y)R(y)$$
 
 
-### Gradient ascend
+if we apply a <span style="color:red">**log derivative trick**</span>: 
+* $\nabla log(f)=\frac{\nabla f}{f}$ we can write
+* $\nabla (f)= f \cdot \nabla log(f)$
+* so $\nabla_{\Theta}p_{\Theta}(y)=p_{\Theta}\nabla_{\Theta} \log{p_{\Theta}}$
+* The gradient becomes: $\nabla_{\Theta}(J(\Theta))=\sum_y p_{\Theta}(y)\nabla_{\Theta}\log{ p_{\Theta}(y)}R(y)$ which is
 
-Despite the Backpropagation optimization where we want to minimize the 
-errors, updating weights following the gradient descent, here we want to 
-<span style="color:#FF0000">**maximise the return, therefore we muve towards gradient ascent**</span>.
+> $$\nabla_{\Theta}(J(\Theta)) = \mathbb{E}_{y \sim p_{\Theta}}[R(y)\nabla_{\Theta}\log{ p_{\Theta}(y)}]$$
+
+The $\nabla_{\Theta}\log{ p_{\Theta}(y)}$ is called  <span style="color:red">**score function**</span>
+
+> So the gradient is the expected value of the return if the completion multiplied the score function for the same
+> completion.
+
+### Monte Carlo policy gradient
+
+The calculation of the expected value requires the everage of all possible complations, given the prompt, which is
+computationally not feasible.
+
+We rather use the 
+
+<span style="color:#FF0000">**Monte Carlo estimate from N randomly sampled trajectories/completions **</span>
 
 
-> The solution is the <span style="color:#FF0000">**gradient ascent for the policy parameter update**</span>
+$$J(\Theta) \approx \frac{1}{N}\sum_{i=1}^{N}R(y_{i})\nabla_{\Theta}\log{ p_{\Theta}(y_i)} \text{ where } y_{i} \sim p_{\Theta} $$
 
-> $$\Theta_{k+1} = \Theta_{k} + \alpha $$
+> It estimates the gradient by averaging over complete sampled rollouts, using each one’s actual reward rather than a
+> learned estimate of how good it was.
+
+Each term pairs a direction with a weight: the score points toward making that rollout’s completion more likely, and the
+reward sets how much that direction counts.
+
+![monte_carlo_example.png](img/monte_carlo_example.png)
+
+Because all completions share a total probability of 1, B’s and C’s gains come from elsewhere, here mostly from
+completions nobody sampled.
+
+A barely changes, because it shares everything up to “340 +” with B, so reinforcing B also lifts most of A’s path.
+
+The numbers are only illustrative: B and C are pushed up, but how every other completion moves depends on how the
+model’s parameters are shared.
+
+> Policy gradient is supervised fine-tuning on your own samples, weighted by reward. With +1/0 rewards, as in the figure
+> above, it is literally SFT on the correct completions, so incorrect completions are never pushed down directly; they
+> only lose share.
+
+### From sequence to tokens
 
 
-To perform gradient ascent, however, we must be able to compute the gradient of this objective with respect to the parameters of our policy
+The score function for a single completion $\nabla_{\Theta}\log{ p_{\Theta}(y)}$ brakes down to a sum of per-token
+log-probabilities (one term per token)
+
+$$\nabla_{\Theta}\log{ p_{\Theta}(y_i)}=\sum_{t=1}^T\nabla_{\Theta}\log{ p_{\Theta}(y_t|y_{\lt t},x)}$$
+
+* each term is the **score of each token**: the direction that most increases the probability of choosing $y_t$, given the
+  previous generation and the prompt
+
+For example, the current generation is until `340 +`, the LLM will generate a prob distribution for each token $v$ in
+the
+vocabulary, so that for each we have a corresponding logit
+
+Step 4: derivative with respect to the logits of Softmax gradient in Claude
+
+
+$z_v \rightarrow p_v=softmax(z_v)$
+
+$p_v=p_{\Theta}(v|y_{\lt t})$ and $s_v=\nabla_{\Theta}\log{p_{v}}$
+
+We know a LLM (mostly decoder-only) transformer based produces probabili
+
+Suppose the model produces $p_68=0.82$ and $p_58=0.07$
 
 
 
 
 
 
+
+
+
+| Rule | Name                           | Expression                                                                                                                                               | Used in    |
+|------|--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|------------|
+| A    | Log-derivative                 | $\displaystyle \frac{d}{dx}\ln f(x)=\frac{f'(x)}{f(x)}\;\Longrightarrow\;\nabla f=f\,\nabla\ln f$                                                        | Steps 1, 4 |
+| B    | Log of a quotient              | $\displaystyle \ln\frac{x}{y}=\ln x-\ln y$                                                                                                               | Step 3     |
+| C    | Log undoes exp                 | $\displaystyle \ln e^{x}=x$                                                                                                                              | Step 3     |
+| D    | Derivative of exp inside a sum | $\displaystyle \frac{d}{dz}e^{z}=e^{z},\qquad \frac{\partial}{\partial z_k}\sum_j e^{z_j}=e^{z_k}$                                                       | Step 4     |
+| E    | Multivariable chain rule       | $\displaystyle \frac{\partial\log\pi(a)}{\partial\theta_{m,i}}=\sum_k\frac{\partial\log\pi(a)}{\partial z_k}\,\frac{\partial z_k}{\partial\theta_{m,i}}$ | Step 5     |
+| F    | Derivative of a linear layer   | $\displaystyle z_k=\sum_i\theta_{k,i}s_i\;\Longrightarrow\;\frac{\partial z_k}{\partial\theta_{m,i}}=\delta_{km}\,s_i$                                   | Step 5     |
