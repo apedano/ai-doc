@@ -216,17 +216,23 @@ $$\nabla_{\Theta}\log{ p_{\Theta}(y_i)}=\sum_{t=1}^T\nabla_{\Theta}\log{ p_{\The
   previous generation and the prompt
 
 For example, the current generation is until `340 +`, the LLM will generate a prob distribution for each token $v$ in
-the
-vocabulary, so that for each we have a corresponding logit
+the vocabulary, so that for each we have a corresponding logit 
 
-Step 4: derivative with respect to the logits of Softmax gradient in Claude
-
-
-$z_v \rightarrow p_v=softmax(z_v)$
+#### Derivative with respect to the logits of Softmax gradient in Claude
 
 $p_v=p_{\Theta}(v|y_{\lt t})$ and $s_v=\nabla_{\Theta}\log{p_{v}}$
 
-We know a LLM (mostly decoder-only) transformer based produces probabili
+$z_v \rightarrow p_v=softmax(z_v) = \frac{e^{z_v}}{\sum_ie^{z_i}}$
+
+We calculate the derivative 
+
+
+
+
+
+
+
+We know a LLM (mostly decoder-only) transformer based produces probabilities 
 
 Suppose the model produces $p_68=0.82$ and $p_58=0.07$
 
