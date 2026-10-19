@@ -179,7 +179,7 @@ computationally not feasible.
 
 We rather use the 
 
-<span style="color:#FF0000">**Monte Carlo estimate from N randomly sampled trajectories/completions **</span>
+<span style="color:#FF0000">**Monte Carlo estimate from N randomly sampled trajectories/completions**</span>
 
 
 $$J(\Theta) \approx \frac{1}{N}\sum_{i=1}^{N}R(y_{i})\nabla_{\Theta}\log{ p_{\Theta}(y_i)} \text{ where } y_{i} \sim p_{\Theta} $$
@@ -206,11 +206,19 @@ model’s parameters are shared.
 
 ### From sequence to tokens
 
+With the Monte Carlo estimate we can write the objective function as
+
+$$J(\Theta) \approx \frac{1}{N}\sum_{i=1}^{N}R(y_{i})\nabla_{\Theta}\log{ p_{\Theta}(y_i)} \text{ where } y_{i} \sim p_{\Theta} $$
+
+* we must consider the token contribution to the completion for each timestamp
+* the reward function is still about the completion, is is not declined to the single token
+* so we elaborate the score function based on the token
+
 
 The score function for a single completion $\nabla_{\Theta}\log{ p_{\Theta}(y)}$ brakes down to a sum of per-token
 log-probabilities (one term per token)
 
-$$\nabla_{\Theta}\log{ p_{\Theta}(y_i)}=\sum_{t=1}^T\nabla_{\Theta}\log{ p_{\Theta}(y_t|y_{\lt t},x)}$$
+$$\nabla_{\Theta}\log{ p_{\Theta}(y_i)}=\sum_{t=1}^T\nabla_{\Theta}\log{ p_{\Theta}(y_t|y_{\lt t})}$$
 
 * each term is the **score of each token**: the direction that most increases the probability of choosing $y_t$, given the
   previous generation and the prompt
@@ -224,7 +232,40 @@ $p_v=p_{\Theta}(v|y_{\lt t})$ and $s_v=\nabla_{\Theta}\log{p_{v}}$
 
 $z_v \rightarrow p_v=softmax(z_v) = \frac{e^{z_v}}{\sum_ie^{z_i}}$
 
-We calculate the derivative 
+So we can rewrite the score function )for each completion that we fix with $y$ and not $y?i$
+
+
+
+$$\nabla_{\Theta}\log{ p_{\Theta}(y)}=\sum_{t=1}^T\nabla_{\Theta}\log{p_{\Theta}(y_t|y_{\lt t})}$$
+
+but, for each time $t$
+
+$$\nabla_{\Theta}\log{ p_{\Theta}(y_t|y_{\lt t})}=\nabla_{\Theta}\log{ \frac{e^{z_t}}{\sum_k e^{z_k}}}=\frac{\delta }{\delta e^{z_u}}\log{e^{z_t}} -\frac{\delta }{\delta e^{z_u}} \log {\sum_k e^{z_k}}$$
+
+* The first term becomes $\frac{\delta }{\delta e^{z_u}}e^{z_t}$ which is $1[t=u]$
+* The second term $\frac{\delta }{\delta e^{z_u}} \log{\sum_k e^{z_k}}$ for the derivation rule $\frac{\partial}{\partial z_u}\ln S=\frac{1}{S}\cdot\frac{\partial S}{\partial z_u}$ becomes
+$\frac{1}{\sum_k e^{z_k}}\frac{\partial}{\partial z_u}\sum_k e^{z_k} \: (\alpha)$
+* The term $\frac{\partial}{\partial z_u}\sum_k e^{z_k}$ is not null only for $k=u$ and it is $\frac{\partial}{\partial z_u}e^{z_u}=e^{z_u} \: (\beta)$
+* so the last two $(\alpha)(\beta)$ are: $\frac{1}{\sum_k e^{z_k}}e^{z_u}=p_u$ 
+
+So, putting everything together we have the score  $s_t=$ 
+
+> $$s_t=\sum_u(1[t=u]-p_u)\nabla z_u$$
+
+<span style="color:#FF0000">**TBC**</span> with Claude explanation of the image
+
+
+
+
+  
+
+
+
+
+
+We calculate the derivative with a <span style="color:#FF0000">**trick for logs derivative**</span>: $\delta \log{f}=\delta f /f \rightarrow $ <span style="color:#FF0000">**$\delta f=f \delta \log{f}$**</span>  
+
+
 
 
 
