@@ -252,6 +252,32 @@ So, putting everything together we have the score  $s_t=$
 
 > $$s_t=\sum_u(1[t=u]-p_u)\nabla z_u$$
 
+![token_scores.png](img/token_scores.png)
+
+In the picture we have two completions $A$ and $B$ and we look, at the same time step 
+$t$ that the tokens produced are with probabilities
+
+* $p(58|17, x, 24, =)=p_{58}=0.07$
+* $p(68|17,x,24,=)=p_{62}=0.82$
+
+For all token probabilities produced by the model at time $t$ in completions A and B,
+$p_58$ is the only one wit $t=u$ so that
+
+$$s_t(p_{58})=1-p_{58}=0.93$$
+
+The same goes for completion B
+$$s_t(p_{68})=1-p_{68}=0.18$$
+
+
+
+
+
+
+
+
+
+
+
 <span style="color:#FF0000">**TBC**</span> with Claude explanation of the image
 
 
@@ -275,7 +301,7 @@ We calculate the derivative with a <span style="color:#FF0000">**trick for logs 
 
 We know a LLM (mostly decoder-only) transformer based produces probabilities 
 
-Suppose the model produces $p_68=0.82$ and $p_58=0.07$
+
 
 
 
