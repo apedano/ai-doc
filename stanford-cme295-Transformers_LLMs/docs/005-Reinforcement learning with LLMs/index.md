@@ -35,7 +35,7 @@ Our stochastic policy $\pi_{\Theta}$ outputs a probability distribution over the
 and an action $a_t$ is sampled from this distribution.
 
 > The <span style="color:#FF0000">**policy**</span> is denoted as conditional probability
-> $$\pi_{\Theta}(a|s)=P(A=a_t|S=s_t)$$
+> $\pi_{\Theta}(a|s)=P(A=a_t|S=s_t)$
 
 with $\sum_a\pi_{\Theta}(a|s)=1 \: \forall s$
 
@@ -65,9 +65,9 @@ the agent will repeatedly:
 
 * Sample actions ($a_t$).
 
-* Transition to a new state (s_t+1).
+* Transition to a new state ($s_{t+1}$).
 
-* Receive a reward (r_t).
+* Receive a reward ($r_t$).
 
 This process will continue until the final state $s_t$ is reached in case:
 
@@ -83,7 +83,7 @@ The sequence of actions, states and rewards
 In the LLM world the trajectory is called <span style="color:red">**completion**</span>:
 
 > Given a prompt $x$, a language model generates a <span style="color:red">**completion
-**</span> $y=(y_1, y_2, \dots ,t_T)$ one token at a time
+**</span> $y=(y_1, y_2, \dots ,y_T)$ one token at a time
 
 The probability of the trajectory, is calculated by the combination of policy and transformation
 using the chain rule:
@@ -91,7 +91,7 @@ using the chain rule:
 ![trajectory_prob.png](img/trajectory_prob.png)
 
 > The same way we have the <span style="color:red">**completion probability**</span>:
-> $$p_{\Theta}(y | x) = \prod_{t=1}^Tp_{\Theta}(y_t|x, y_{\lt t})$$
+> $p_{\Theta}(y | x) = \prod_{t=1}^Tp_{\Theta}(y_t|x, y_{\lt t})$
 
 The product of all the probability of the current token geneated at time $t$, given the input and all the
 previous tokens ($\lt t$)
@@ -123,18 +123,20 @@ unit tests are common examples.
 
 > Our goal is to find the parameters θ (parameters of LLM) that maximize the expected reward, which we call
 > the <span style="color:red">**objective J(θ)**</span>
-> $$J(\Theta)=\mathbb{E}_{x \sim \mathcal{D},y \sim p_{\Theta}(\cdot| x)}[R(x,y)]$$
+> $J(\Theta)=\mathbb{E}_{x \sim \mathcal{D},y \sim p_{\Theta}(\cdot| x)}[R(x,y)]$
 
 where
 
 * $x\sim\mathcal{D}$: a prompt $x$ drawn from a dataset (distribution) $\mathcal{D}$.
 * $y\sim p_\Theta(\cdot\mid x)$: a response $y$ sampled from the model with parameters $\Theta$, given the prompt. The dot means “the distribution over all $y$”.
-$R(x,y)$: a scalar reward for that prompt/response pair (e.g. from a reward model).
+* $R(x,y)$: a scalar reward for that prompt/response pair (e.g. from a reward model).
 * $J(\Theta)$: the average reward the model earns. Training maximizes it.
 
 $$J(\Theta)=\mathbb{E}_{x\sim\mathcal{D},\,y\sim p_\Theta(\cdot\mid x)}[R(x,y)]=\sum_x \mathcal{D}(x)\sum_y p_\Theta(y\mid x)\,R(x,y)$$
 
-An expectation is $(probability) × (value)$ summed over outcomes. 
+An expectation is $(probability) × (value)$ summed over outcomes.
+
+$$\mathbb{E}(A)=\sum a \cdot P(a)=a_1 \cdot p(a_1) + a_2 \cdot p(a_2) + \cdots a_k \cdot p(a_k)$$
 
 Here the outcomes are pairs $(x,y)$ with probability $\mathcal{D}(x)\,p_\Theta(y\mid x)$.
 
