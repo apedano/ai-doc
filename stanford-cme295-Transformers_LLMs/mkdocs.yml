@@ -72,7 +72,7 @@ nav:
   - Training:
       - 4-LLM training/index.md
   - Reinforcement Learning RL:
-      - 005-Reinforcement learning with LLMs/index.md
+      - 5-Reinforcement learning with LLMs/index.md
 
 
 
