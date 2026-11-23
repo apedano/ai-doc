@@ -360,8 +360,8 @@ We need a reinforcment mechanism
 
 ## RLHF (Reinforcment Learning from Human Feedback)
 
-**STEP 1**: for each $(x,\hat{y})$ the human feedback assigns a score to it: <span style="color:red">*
-*$r(x_1,\hat{y_1})$**</span>
+**STEP 1**: for each $(x,\hat{y})$ the human feedback assigns a score to it: $r(x_1,\hat{y_1})$
+
 **STEP 2**: reinforcement learning the score is used to steer the model response
 
 #### Bradley-Terry formulation

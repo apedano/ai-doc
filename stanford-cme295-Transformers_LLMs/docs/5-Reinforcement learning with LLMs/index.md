@@ -21,6 +21,7 @@ A formal structure for RL, outlining the learning objective used for RL training
 
 > When running RL training, we have an <span style="color:red">**agent**</span> that, at every time step $t$ iteratively
 > takes <span style="color:red">**actions $a_t$**</span> within some <span style="color:red">**environment**</span>;
+ 
 
 ### Policy
 
@@ -28,16 +29,23 @@ A formal structure for RL, outlining the learning objective used for RL training
 **</span> (we can think of this as the agent’s brain)
 > with parameters $\Theta$ (e.g., the policy is the LLM itself in the context of training an LLM).
 
-Our policy can either be <u>deterministic</u> or <u>stochastic</u>, but for LLMs we will assume the policy
+Our policy can either be <u>deterministic</u> or <u>stochastic</u>, but for <span style="color:#FF0000">**LLMs**</span> we will assume the policy
 is <span style="color:red">**stochastic**</span>.
 
 Our stochastic policy $\pi_{\Theta}$ outputs a probability distribution over the set of possible actions,
 and an action $a_t$ is sampled from this distribution.
 
-> The <span style="color:#FF0000">**policy**</span> is denoted as conditional probability
-> $\pi_{\Theta}(a|s)=P(A=a_t|S=s_t)$
+The <span style="color:#FF0000">**policy**</span> is denoted as conditional probability $\pi_{\Theta}(a|s)=P(A=a_t|S=s_t)$
 
 with $\sum_a\pi_{\Theta}(a|s)=1 \: \forall s$
+
+
+> If the policy is our LLM, the action is the output of it, meaning the <span style="color:#FF0000">**next token**</span> $a_t$
+
+> So the LLM is denoted by the probability of generating one token (over the output distribution), given the prompt and the sequence of tokens
+> generated in the previous steps 
+
+$$ \pi_{\Theta}(a|s)=P(A=a_t|S=s_t) \rightarrow \pi_{\Theta}(y_t|x, y_{<t})$$
 
 ### Environment, state and Transition function
 
@@ -55,6 +63,22 @@ a transition function**</span>, which is part of the environment.
 Intuitively, we can <span style="color:red">**conceptualize RL as a trial and error process**</span>. As our agent acts
 in its environment, the training process reinforces—either positively or negatively—observed behavior via the reward.
 Hence, the name “reinforcement” learning.
+
+#### Type of rewards
+
+We distinguish two tipes of reward models
+
+#####  <u>RLHf</u> (Reinforcment learning from Human Feedback)
+
+- used for <span style="color: red;"><strong>subjective</strong></span> problems, it is not possible to objeectively determine the reward; the human feedback is necesary
+- the objective function is based on the <span style="color: red;"><strong>Bradley-Terry formulation</strong></span>, based on the difference of rewards of pairs of output sequences.
+- the objective function optimizes a <span style="color: red;"><strong>reward model</strong></span>
+
+#####  <u>RLVR</u> (Reinforcment learning with Verifiable Reward)
+
+- the reward can be assigned with deterministic functions (tests for code, or results for calculus, etc)
+- The example is reasoning learning
+
 
 ### Process
 
@@ -74,6 +98,8 @@ This process will continue until the final state $s_t$ is reached in case:
 * $s_t$ is a <span style="color:#FF0000">**terminal state**</span>
 * a pre-defined <span style="color:#FF0000">**maximum number of steps**</span> has been reached
 
+## Policy gradient
+
 ### Trajectory / Completion
 
 The sequence of actions, states and rewards
@@ -89,6 +115,22 @@ The probability of the trajectory, is calculated by the combination of policy an
 using the chain rule:
 
 ![trajectory_prob.png](img/trajectory_prob.png)
+
+### The optimization process
+
+> Change model weights to <span style="color: red;"><strong>increase rewards</strong></span> to <span style="color: red;"><strong>maximize the expected rewards</strong></span> of the generated outputs of the model/policy
+
+![alt text](img/preference_tuning.png)
+
+
+
+
+
+
+
+
+
+
 
 > The same way we have the <span style="color:red">**completion probability**</span>:
 > $p_{\Theta}(y | x) = \prod_{t=1}^Tp_{\Theta}(y_t|x, y_{\lt t})$
